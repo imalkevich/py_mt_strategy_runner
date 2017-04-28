@@ -2,26 +2,17 @@
 
 import os
 import sys
+from datetime import datetime
 from util.configuration_parameters import get_configurations
 from util.sets import create_set_file
 from util.launch import create_ini_file
 from util.run_task import exec_commands
 from util.start_terminal import init_terminal
-from datetime import datetime
-
+from util.terminal import TERMINAL_POOL
 
 SYMBOL = sys.argv[1]
 DATE_FROM = sys.argv[2]
 DATE_TO = sys.argv[3]
-
-TERMINAL_POOL = [
-    "d:\\Program Files\\GAINSY MT4_1",
-    "d:\\Program Files\\GAINSY MT4_2",
-    "d:\\Program Files\\GAINSY MT4_3",
-    "d:\\Program Files\\GAINSY MT4_4",
-    "d:\\Program Files\\GAINSY MT4_5",
-    "d:\\Program Files\\GAINSY MT4_6"
-]
 
 for terminal in TERMINAL_POOL:
     init_terminal(terminal)

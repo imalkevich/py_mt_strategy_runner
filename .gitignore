@@ -1,1 +1,3 @@
 .vscode
+output/*
+util/__pycache__
