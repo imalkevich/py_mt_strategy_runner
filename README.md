@@ -1,11 +1,53 @@
 This is an utility to collect MT4 experts reports.
 
 The idea is:
-1) Create .set file with expert configuration to be used for emulation;
-2) Create .ini file with MT4 remote start with preselected *.set file from set 1;
-3) Run the script with the following args - symbol dateFrom dateTo, for example "main.py GBPUSD 2017.03.01 2017.04.01".
+1) Create configurations in dbo.wsrt_configuration_option table (if not exists);
+2) Create a run - entry in wsrt_run table (if not exists);
+3) Run terminals for a specific run from step #2 above.
 
-Think about the following:
-1) Separate step with getting configuration and running MT4 workers;
-2) Use database for storing configurations;
-3) Use database for processing configurations while running MT4 agents.
+Prepare configurations:
+1) Open ./util/params.py file and edit 'param_grid' with needed ranges;
+2) Run ./prepare_configuration.py from cmd, like:
+    - (optional) Activate conda environment if needed (see section below)
+    - When in directory, run "python prepare_configuration.py"
+
+Run terminals to collect reports:
+1) Install Microsoft ODBC Driver 13.1 (https://www.microsoft.com/download/details.aspx?id=53339). 
+Also install pyodbc module for python (either for conda - "conda install pyodbc", or using pip - "pip install pyodbc")
+2) Add new entry to dbo.wsrt_run if needed and remember 'Name' of the run (connection string is in config.yaml);
+3) Run script for execution:
+    - (optional) Activate conda environment if needed (see section below)
+    - Run main.py with run Name (see step #2 above), something like:
+        "python main.py GBPUSD_03012017_04012017"
+    - Wait for the script to complete. As long as it may take long, you might need to
+        stop execution. In this case please refer to interruption section below.
+
+How to activate proper conda environment:
+1) Run the following comman to list available environments:
+    "conda info --envs"
+2) Activate needed environment using, for example:
+    "activate root"
+
+How it works internally:
+1) List of available configuration is stored in dbo.wsrt_configuration_option table
+2) List of run is saved in dbo.wsrt_run table;
+3) To create a run results, you need to prepare dbo.wsrt_run_result table with needed configurations;
+4) Once srcipt is started, it will:
+    - Look for a run by run 'Name' provided as input
+    - Select not run configurations - for those where Run start datetime is NULL
+    - Once configuration is run in MT terminal, script will parse report and store it in the database
+
+MT4 details 
+The approach for running MT4 is simple:
+1) Grab configuration from database and save it in .set file;
+2) Create .ini file with MT4 remote start with set file from step #1 above;
+3) Remote start of terminal in a separate process with .ini file from step #2;
+4) Once the process is finishe, pick report.html file, parse it, send data to database.
+
+Interruption during run:
+1) As long as script might take a long time to run (days), it is nesessary to make the
+whole approach tolerant for such interruptions;
+2) The script is design with this in mind, so whenever you need to stop it - close the window, and that should be it;
+3) Once you are at the point where you are coming to the end of collection data, 
+please make sure that there are no entries for dbo.wsrt_run_result with Run start datetime not NULL, but Finish datetime is NULL. 
+This means that during running you had to stop script execution, and some processes running at that point didn't have a chance to complete.
