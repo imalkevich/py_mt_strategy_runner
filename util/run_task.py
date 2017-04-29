@@ -8,6 +8,7 @@ def _done(p):
 def _success(p):
     return p.returncode == 0
 def _fail():
+    print("Process failed...")
     sys.exit(1)
 
 task_running = dict()

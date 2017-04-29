@@ -17,8 +17,7 @@ from db.configuration_option import get_option_by_id
 COMMAND_TEMPLATE = '"{}\\terminal.exe" "{}"'
 MAX_WAITS_COUNT = 3
 
-START_RUN = datetime.now()
-print("start running terminals {} ...".format(datetime.strftime(START_RUN, "%b %d %y %H:%M:%S %Z")))
+print("start running terminals {} ...".format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
 
 RUN_NAME = sys.argv[1]
 
@@ -44,7 +43,8 @@ if run is not None:
 
             # no configuration for processing
             if run_result is None and len(commands) == 0:
-                print("No configuration found for processing... waiting...")
+                print("No configuration found for processing... {}"
+                      .format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
                 time.sleep(30) # wait for 30 seconds
                 number_of_waits = number_of_waits + 1
                 if number_of_waits >= MAX_WAITS_COUNT:
@@ -80,7 +80,6 @@ if run is not None:
 else:
     print("No run found by name: {}".format(RUN_NAME))
 
-finish_run = datetime.now()
-print("end running terminals {} ...".format(datetime.strftime(finish_run, "%b %d %y %H:%M:%S %Z")))
+print("end running terminals {} ...".format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
 
 input("press Enter to exit ...")
