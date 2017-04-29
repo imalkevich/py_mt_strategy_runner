@@ -17,7 +17,8 @@ from db.configuration_option import get_option_by_id
 COMMAND_TEMPLATE = '"{}\\terminal.exe" "{}"'
 MAX_WAITS_COUNT = 3
 
-print("start running terminals {} ...".format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
+START_TIME = datetime.now()
+print("start running terminals {} ...".format(datetime.strftime(START_TIME, "%b %d %y %H:%M:%S %Z")))
 
 RUN_NAME = sys.argv[1]
 
@@ -32,10 +33,11 @@ if run is not None:
     date_from = run['TestDateFrom']
     date_to = run['TestDateTo']
 
+    number_of_waits = 0
+
     while True:
         # run batch of commands equal to number of terminals
         commands = []
-        number_of_waits = 0
         results = dict()
 
         for idx in range(len(TERMINAL_POOL)):
@@ -45,7 +47,7 @@ if run is not None:
             if run_result is None and len(commands) == 0:
                 print("No configuration found for processing... {}"
                       .format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
-                time.sleep(30) # wait for 30 seconds
+                time.sleep(10) # wait for a while
                 number_of_waits = number_of_waits + 1
                 if number_of_waits >= MAX_WAITS_COUNT:
                     break
@@ -80,6 +82,11 @@ if run is not None:
 else:
     print("No run found by name: {}".format(RUN_NAME))
 
-print("end running terminals {} ...".format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
+
+FINISH_TIME = datetime.now()
+print("end running terminals {} ...".format(datetime.strftime(FINISH_TIME, "%b %d %y %H:%M:%S %Z")))
+
+ELAPSED = FINISH_TIME - START_TIME
+print("elapsed {}...".format(ELAPSED))
 
 input("press Enter to exit ...")

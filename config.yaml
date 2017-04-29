@@ -6,4 +6,4 @@ username  = mt_strategy_runner_user
 password = mm_!*!_5678XXX
 
 [terminal]
-pool = d:\Program Files\GAINSY MT4_1,d:\Program Files\GAINSY MT4_2,d:\Program Files\GAINSY MT4_3,d:\Program Files\GAINSY MT4_4,d:\Program Files\GAINSY MT4_5,d:\Program Files\GAINSY MT4_6,d:\Program Files\GAINSY MT4_7,d:\Program Files\GAINSY MT4_8
+pool = d:\Program Files\GAINSY MT4_1,d:\Program Files\GAINSY MT4_2,d:\Program Files\GAINSY MT4_3,d:\Program Files\GAINSY MT4_4
