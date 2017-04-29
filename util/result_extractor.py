@@ -1,13 +1,13 @@
 """ extract results and store them in csv file """
 
 import re
-import csv
 import glob
 from os import path
 from .report import report_file_name_template, report_file_folder
 from .params import RUNNER_FOLDER
 
 reNumber = r'([-+]?\d+[.]?\d*)'
+reNumberWithPercent = r'([-+]?\d+[.]?\d*) (\([-+]?\d+[.]?\d*%\))'
 reBoolean = r'(true|false)'
 
 dict_params = {
@@ -39,25 +39,31 @@ dict_params = {
     'iWPR_Filter_Close': r'iWPR_Filter_Close='+reNumber,
     'TotalNetProfit': r'<td>Total net profit</td><td align=right>'+reNumber+'</td>',
     'GrossProfit': r'<td>Gross profit</td><td align=right>'+reNumber+'</td>',
-    'GrossLoss': r'<td>Gross loss</td><td align=right>'+reNumber+'</td>'
+    'GrossLoss': r'<td>Gross loss</td><td align=right>'+reNumber+'</td>',
+    'ProfitFactor': r'<td>Profit factor</td><td align=right>'+reNumber+'</td>',
+    'ExpectedPayoff': r'<td>Expected payoff</td><td align=right>'+reNumber+'</td>',
+    'AbsoluteDrawdown': r'<td>Absolute drawdown</td><td align=right>'+reNumber+'</td>',
+    'MaximalDrawdown': r'<td>Maximal drawdown</td><td align=right>'+reNumberWithPercent+'</td>',
+    'TotalTrades': r'<td>Total trades</td><td align=right>'+reNumber+'</td>'
 }
 
-def prepare_results(output_file_name, terminal_paths):
+def prepare_results(terminals):
     """ prepare report from result files """
-    with open(output_file_name, 'w', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile, delimiter=',')
-        csv_writer.writerow([k for k, v in dict_params.items()])
+    results = []
+    for terminal_path, result_id in terminals.items():
+        report_folder = path.join(terminal_path, report_file_name_template
+                                  .format(RUNNER_FOLDER, report_file_folder, result_id))
+        for report_file in glob.glob(report_folder):
+            lines = ''.join(open(report_file, 'r').readlines())
+            data = dict()
+            data['ResultId'] = result_id
+            for k, val in dict_params.items():
+                search = re.search(val, lines)
+                if search:
+                    data[k] = search.group(1)
+                else:
+                    data[k] = "NA"
+            results.append(data)
 
-        for terminal in terminal_paths:
-            report_folder = path.join(terminal, report_file_name_template
-                            .format(RUNNER_FOLDER, report_file_folder, "*"))
-            for report_file in glob.glob(report_folder):
-                lines = ''.join(open(report_file, 'r').readlines())
-                data = []
-                for k, v in dict_params.items():
-                    search = re.search(v, lines)
-                    if search:
-                        data.append(search.group(1))
-                    else:
-                        data.append("NA")
-                csv_writer.writerow(data)
+    return results
+

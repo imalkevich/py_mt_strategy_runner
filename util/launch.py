@@ -17,7 +17,7 @@ TestDateEnable=true
 TestFromDate=${TestFromDate}
 TestToDate=${TestToDate}
 TestReport=${TestReport} 
-TestReplaceReport=false 
+TestReplaceReport=true 
 TestShutdownTerminal=true
 TestVisualEnable=false
 ''')

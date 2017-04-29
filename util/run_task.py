@@ -2,7 +2,6 @@
 import sys
 from subprocess import Popen
 import time
-import re
 
 def _done(p):
     return p.poll() is not None

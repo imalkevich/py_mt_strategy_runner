@@ -3,11 +3,11 @@
 from string import Template
 
 param_grid = {
-    "TakeProfit": range(10, 40, 1), # 26
-    "StopLoss":range(60, 130, 10), # 120
+    "TakeProfit": range(11, 21, 1), # 26
+    "StopLoss": [120], # 120
     "UseStopLevels": [1],
-    "SecureProfit": range(0, 5, 1), # 1
-    "SecureProfitTriger": range(0, 21, 1), # 10
+    "SecureProfit": [1], # 1
+    "SecureProfitTriger": [10], # 10
     "MaxLossPoints": [-65],
     "RecoveryMode": [0],
     "FixedLot": [1.0],
