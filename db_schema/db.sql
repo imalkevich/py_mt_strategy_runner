@@ -34,6 +34,33 @@ CREATE TABLE [dbo].[wsrt_configuration_option] (
     
 	CONSTRAINT [PK_wsrt_configuration_option] PRIMARY KEY CLUSTERED ([OptionId] ASC)
 );
+-- add unique constraint on parameters
+ALTER TABLE [dbo].[wsrt_configuration_option] ADD CONSTRAINT
+	[UC_wsrt_configuration_option_parameters] UNIQUE 
+	([TakeProfit],
+	[StopLoss],
+	[UseStopLevels],
+	[SecureProfit],
+	[SecureProfitTriger],
+	[MaxLossPoints],
+	[RecoveryMode],
+	[FixedLot],
+	[AutoMM],
+	[AutoMM_Max],
+	[Risk],
+	[MultiLotPercent],
+	[iMA_Period],
+	[iCCI_Period],
+	[iATR_Period],
+	[iWPR_Period],
+	[FilterATR],
+	[iCCI_OpenFilter],
+	[iMA_Filter_Open_a],
+	[iMA_Filter_Open_b],
+	[iWPR_Filter_Open_a],
+	[iWPR_Filter_Open_b],
+	[Price_Filter_Close],
+	[iWPR_Filter_Close]);
 
 CREATE TABLE [dbo].[wsrt_run] (
 	[RunId] INT IDENTITY (1, 1) NOT NULL,

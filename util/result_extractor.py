@@ -62,7 +62,7 @@ def prepare_results(terminals):
                 if search:
                     data[k] = search.group(1)
                 else:
-                    data[k] = "NA"
+                    data[k] = None
             results.append(data)
 
     return results

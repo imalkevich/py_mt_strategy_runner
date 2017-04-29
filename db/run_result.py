@@ -97,14 +97,14 @@ def update_run_result_with_report(report):
         [ResultId] = ?
     """
     with cursor.execute(tsql,
-                        Decimal(report['TotalNetProfit']),
-                        Decimal(report['GrossProfit']),
-                        Decimal(report['GrossLoss']),
-                        Decimal(report['ProfitFactor']),
-                        Decimal(report['ExpectedPayoff']),
-                        Decimal(report['AbsoluteDrawdown']),
-                        Decimal(report['MaximalDrawdown']),
-                        int(report['TotalTrades']),
+                        Decimal(report['TotalNetProfit']) if report['TotalNetProfit'] is not None else None,
+                        Decimal(report['GrossProfit']) if report['GrossProfit'] is not None else None,
+                        Decimal(report['GrossLoss']) if report['GrossLoss'] is not None else None,
+                        Decimal(report['ProfitFactor']) if report['ProfitFactor'] is not None else None,
+                        Decimal(report['ExpectedPayoff']) if report['ExpectedPayoff'] is not None else None,
+                        Decimal(report['AbsoluteDrawdown']) if report['AbsoluteDrawdown'] is not None else None,
+                        Decimal(report['MaximalDrawdown']) if report['MaximalDrawdown'] is not None else None,
+                        int(report['TotalTrades']) if report['TotalTrades'] is not None else None,
                         datetime.utcnow(),
                         report['ResultId']):
         _cnxn.commit()

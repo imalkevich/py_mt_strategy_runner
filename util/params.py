@@ -3,7 +3,7 @@
 from string import Template
 
 param_grid = {
-    "TakeProfit": range(11, 21, 1), # 26
+    "TakeProfit": [26], # 26
     "StopLoss": [120], # 120
     "UseStopLevels": [1],
     "SecureProfit": [1], # 1
