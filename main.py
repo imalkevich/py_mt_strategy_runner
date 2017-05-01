@@ -20,67 +20,68 @@ MAX_WAITS_COUNT = 3
 START_TIME = datetime.now()
 print("start running terminals {} ...".format(datetime.strftime(START_TIME, "%b %d %y %H:%M:%S %Z")))
 
-RUN_NAME = sys.argv[1]
+RUN_NAMES = [name.strip() for name in sys.argv[1].split(",")]
 
 for terminal in TERMINAL_POOL:
     init_terminal(terminal)
 
-run = get_by_name(RUN_NAME)
+for run_name in RUN_NAMES:
+    run = get_by_name(run_name)
 
-if run is not None:
-    run_id = run['RunId']
-    symbol = run['TestSymbol']
-    date_from = run['TestDateFrom']
-    date_to = run['TestDateTo']
+    if run is not None:
+        run_id = run['RunId']
+        symbol = run['TestSymbol']
+        date_from = run['TestDateFrom']
+        date_to = run['TestDateTo']
 
-    number_of_waits = 0
+        number_of_waits = 0
 
-    while True:
-        # run batch of commands equal to number of terminals
-        commands = []
-        results = dict()
+        while True:
+            # run batch of commands equal to number of terminals
+            commands = []
+            results = dict()
 
-        for idx in range(len(TERMINAL_POOL)):
-            run_result = get_for_processing_by_run_id(run_id)
+            for idx in range(len(TERMINAL_POOL)):
+                run_result = get_for_processing_by_run_id(run_id)
 
-            # no configuration for processing
-            if run_result is None and len(commands) == 0:
-                print("No configuration found for processing... {}"
-                      .format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
-                time.sleep(10) # wait for a while
-                number_of_waits = number_of_waits + 1
-                if number_of_waits >= MAX_WAITS_COUNT:
+                # no configuration for processing
+                if run_result is None and len(commands) == 0:
+                    print("No configuration found for processing... {}"
+                        .format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
+                    time.sleep(10) # wait for a while
+                    number_of_waits = number_of_waits + 1
+                    if number_of_waits >= MAX_WAITS_COUNT:
+                        break
+                    else:
+                        continue
+                elif run_result is None:
                     break
-                else:
-                    continue
-            elif run_result is None:
+
+                terminal_idx = idx % len(TERMINAL_POOL)
+                terminal_path = TERMINAL_POOL[terminal_idx]
+                config = get_option_by_id(run_result['OptionId'])
+                run_result_id = run_result['ResultId']
+                set_file_name = create_set_file(terminal_path, config, run_result_id)
+                ini_file = create_ini_file(terminal_path, run_result_id,
+                                        date_from, date_to, symbol, set_file_name)
+                cmd = COMMAND_TEMPLATE.format(terminal_path, ini_file)
+                commands.append(cmd)
+
+                # for result processing
+                results[terminal_path] = run_result_id
+
+            if number_of_waits >= MAX_WAITS_COUNT:
+                print("Stop waiting for configurations to process")
                 break
 
-            terminal_idx = idx % len(TERMINAL_POOL)
-            terminal_path = TERMINAL_POOL[terminal_idx]
-            config = get_option_by_id(run_result['OptionId'])
-            run_result_id = run_result['ResultId']
-            set_file_name = create_set_file(terminal_path, config, run_result_id)
-            ini_file = create_ini_file(terminal_path, run_result_id,
-                                       date_from, date_to, symbol, set_file_name)
-            cmd = COMMAND_TEMPLATE.format(terminal_path, ini_file)
-            commands.append(cmd)
+            exec_commands(commands, len(TERMINAL_POOL))
 
-            # for result processing
-            results[terminal_path] = run_result_id
+            reports = prepare_results(results)
 
-        if number_of_waits >= MAX_WAITS_COUNT:
-            print("Stop waiting for configurations to process")
-            break
-
-        exec_commands(commands, len(TERMINAL_POOL))
-
-        reports = prepare_results(results)
-
-        for report in reports:
-            update_run_result_with_report(report)
-else:
-    print("No run found by name: {}".format(RUN_NAME))
+            for report in reports:
+                update_run_result_with_report(report)
+    else:
+        print("No run found by name: {}".format(RUN_NAME))
 
 
 FINISH_TIME = datetime.now()

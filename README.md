@@ -17,7 +17,7 @@ Also install pyodbc module for python (either for conda - "conda install pyodbc"
 2) Add new entry to dbo.wsrt_run if needed and remember 'Name' of the run (connection string is in config.yaml);
 3) Run script for execution:
     - (optional) Activate conda environment if needed (see section below)
-    - Run main.py with run Name (see step #2 above), something like:
+    - Run main.py with run Name(s) - comma separated list (see step #2 above), something like:
         "python main.py GBPUSD_03012017_04012017"
     - Wait for the script to complete. As long as it may take long, you might need to
         stop execution. In this case please refer to interruption section below.

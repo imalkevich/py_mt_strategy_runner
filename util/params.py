@@ -17,25 +17,25 @@ param_grid = {
     "MultiLotPercent": [1.1],
 
     #_Periods=Периоды индикаторов
-    "iMA_Period": [75],
-    "iCCI_Period": [18],
-    "iATR_Period": [14],
-    "iWPR_Period": [11],
+    "iMA_Period": range(400, 601, 1), # 75
+    "iCCI_Period": [18], # 18
+    "iATR_Period": [14], # 14
+    "iWPR_Period": [11], # 11
 
     #Расширенные параметры оптимизации
     #_AddOpenFilters=---
-    "FilterATR": [6],
-    "iCCI_OpenFilter": [150.0],
+    "FilterATR": [6], # 6
+    "iCCI_OpenFilter": [150.0], # 150.0
 
     # _OpenOrderFilters=---
-    "iMA_Filter_Open_a": [15],
-    "iMA_Filter_Open_b": [39],
-    "iWPR_Filter_Open_a": [-99],
-    "iWPR_Filter_Open_b": [-95],
+    "iMA_Filter_Open_a": [15], # 15
+    "iMA_Filter_Open_b": [39], # 39
+    "iWPR_Filter_Open_a": [-99], # -99
+    "iWPR_Filter_Open_b": [-95], # -95
 
     #_CloseOrderFilters=---
-    "Price_Filter_Close": [14],
-    "iWPR_Filter_Close": [-19]
+    "Price_Filter_Close": [14], # 14
+    "iWPR_Filter_Close": [-19] # -19
 }
 
 feature_names = list(param_grid.keys())
