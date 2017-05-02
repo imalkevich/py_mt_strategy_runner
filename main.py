@@ -47,7 +47,7 @@ for run_name in RUN_NAMES:
                 # no configuration for processing
                 if run_result is None and len(commands) == 0:
                     print("No configuration found for processing... {}"
-                        .format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
+                          .format(datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
                     time.sleep(10) # wait for a while
                     number_of_waits = number_of_waits + 1
                     if number_of_waits >= MAX_WAITS_COUNT:
@@ -63,7 +63,7 @@ for run_name in RUN_NAMES:
                 run_result_id = run_result['ResultId']
                 set_file_name = create_set_file(terminal_path, config, run_result_id)
                 ini_file = create_ini_file(terminal_path, run_result_id,
-                                        date_from, date_to, symbol, set_file_name)
+                                           date_from, date_to, symbol, set_file_name)
                 cmd = COMMAND_TEMPLATE.format(terminal_path, ini_file)
                 commands.append(cmd)
 

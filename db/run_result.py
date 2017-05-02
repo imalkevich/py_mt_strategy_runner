@@ -62,9 +62,10 @@ def get_for_processing_by_run_id(run_id):
     FROM
         [dbo].[wsrt_run_result]
     WHERE
-        [RunStartDateTimeUtc] IS NULL
+        [RunId] = ?
+        AND [RunStartDateTimeUtc] IS NULL
     """
-    with cursor.execute(tsql):
+    with cursor.execute(tsql, run_id):
         row = cursor.fetchone()
         if row:
             run_result = dict(zip([column[0] for column in cursor.description], row))

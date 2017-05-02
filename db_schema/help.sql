@@ -5,6 +5,8 @@ select * from wsrt_run
 select * from wsrt_run_result where 
 select count(1) from wsrt_run_result where RunFinishDateTimeUtc is not null
 select count(1) from wsrt_run_result where RunFinishDateTimeUtc is null
+select count(1) from wsrt_run_result where RunId = 2 and RunFinishDateTimeUtc is not null and TotalNetProfit is not null
+select * from wsrt_run_result where RunId = 2 and RunFinishDateTimeUtc is not null 
 
 select * from wsrt_run_result where RunStartDateTimeUtc is not null and RunFinishDateTimeUtc IS NULL
 update wsrt_run_result set RunStartDateTimeUtc = NULL WHERE RunStartDateTimeUtc is not null and RunFinishDateTimeUtc IS NULL
@@ -52,5 +54,6 @@ from
 	inner join wsrt_configuration_option op on rr.OptionId = op.OptionId
 where
 	rr.RunFinishDateTimeUtc IS NOT NULL
+	and rr.RunId = 2
 	and op.TakeProfit = 26
 	and (rr.TotalNetProfit < -4000.0 or rr.TotalNetProfit > 2000.0)
