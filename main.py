@@ -81,7 +81,7 @@ for run_name in RUN_NAMES:
             for report in reports:
                 update_run_result_with_report(report)
     else:
-        print("No run found by name: {}".format(RUN_NAME))
+        print("No run found by name: {}".format(run_name))
 
 
 FINISH_TIME = datetime.now()

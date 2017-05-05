@@ -5,7 +5,7 @@ select * from wsrt_run
 select * from wsrt_run_result where 
 select count(1) from wsrt_run_result where RunFinishDateTimeUtc is not null
 select count(1) from wsrt_run_result where RunFinishDateTimeUtc is null
-select count(1) from wsrt_run_result where RunId = 16 and RunFinishDateTimeUtc is null
+select count(1) from wsrt_run_result where RunId = 4 and RunFinishDateTimeUtc is null
 select * from wsrt_run_result where RunId = 16 and RunFinishDateTimeUtc is not null 
 
 select * from wsrt_run_result where RunStartDateTimeUtc is not null and RunFinishDateTimeUtc IS NULL
