@@ -9,7 +9,7 @@ Prepare configurations:
 1) Open ./util/params.py file and edit 'param_grid' with needed ranges;
 2) Run ./prepare_configuration.py from cmd, like:
     - (optional) Activate conda environment if needed (see section below)
-    - When in directory, run "python prepare_configuration.py"
+    - When in directory, run "python prepare_configuration.py iMA_Period_50_251", where iMA_Period_50_251 is configuration name
 
 Run terminals to collect reports:
 1) Install Microsoft ODBC Driver 13.1 (https://www.microsoft.com/download/details.aspx?id=53339). 

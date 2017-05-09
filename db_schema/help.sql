@@ -1,12 +1,11 @@
-
-
-select * from wsrt_configuration_option where OptionId > 544
+select * from wsrt_configuration
+select count(1) from wsrt_configuration_option where ConfigurationId = 2
 select * from wsrt_run
-select * from wsrt_run_result where 
+update wsrt_run set [Name] = 'GBPUSD_12012014_01012015_IMAPeriod' where RunId=45 
 select count(1) from wsrt_run_result where RunFinishDateTimeUtc is not null
 select count(1) from wsrt_run_result where RunFinishDateTimeUtc is null
-select count(1) from wsrt_run_result where RunId = 4 and RunFinishDateTimeUtc is null
-select * from wsrt_run_result where RunId = 16 and RunFinishDateTimeUtc is not null 
+select count(1) from wsrt_run_result where RunId = 69 and RunFinishDateTimeUtc is null
+select * from wsrt_run_result where RunId = 66 and RunFinishDateTimeUtc is not null 
 
 select * from wsrt_run_result where RunStartDateTimeUtc is not null and RunFinishDateTimeUtc IS NULL
 update wsrt_run_result set RunStartDateTimeUtc = NULL WHERE RunStartDateTimeUtc is not null and RunFinishDateTimeUtc IS NULL
@@ -20,7 +19,7 @@ select
 from wsrt_run_result
 where 
 	RunFinishDateTimeUtc is not null
-	and RunId = 2
+	and RunId = 67
 
 select
 	rr.TotalNetProfit as TotalNetProfit,

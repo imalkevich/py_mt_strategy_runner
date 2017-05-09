@@ -22,7 +22,7 @@ def get_option_by_id(id):
 
     return option
 
-def insert_configuration(opt):
+def insert_configuration(opt, configurationId):
     cursor = _cnxn.cursor()
     try:
         with cursor.execute("""INSERT INTO [dbo].[wsrt_configuration_option]
@@ -54,12 +54,15 @@ def insert_configuration(opt):
                 iWPR_Filter_Open_b,
 
                 Price_Filter_Close,
-                iWPR_Filter_Close
+                iWPR_Filter_Close,
+
+                ConfigurationId
             ) 
             VALUES 
             (
                 ?,?,?,?,?,?,?,?,?,?,?,?,
-                ?,?,?,?,?,?,?,?,?,?,?,?
+                ?,?,?,?,?,?,?,?,?,?,?,?,
+                ?
             )
         """,
                             opt['TakeProfit'],
@@ -89,7 +92,8 @@ def insert_configuration(opt):
                             opt['iWPR_Filter_Open_b'],
 
                             opt['Price_Filter_Close'],
-                            opt['iWPR_Filter_Close']):
+                            opt['iWPR_Filter_Close'],
+                            configurationId):
             _cnxn.commit()
     except pyodbc.IntegrityError as err:
         print(err)

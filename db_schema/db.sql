@@ -1,3 +1,13 @@
+CREATE TABLE [dbo].[wsrt_configuration] (
+	[ConfigurationId] INT IDENTITY (1, 1) NOT NULL,
+	[Name] NVARCHAR(256) NOT NULL,
+	[Description] NVARCHAR(MAX) NULL,
+
+	[CreatedDateTimeUtc] DATETIME2 (7)  CONSTRAINT [DF_wsrt_configuration_CreatedDateTimeUtc] DEFAULT (sysutcdatetime()) NOT NULL,
+
+	CONSTRAINT [PK_wsrt_configuration] PRIMARY KEY CLUSTERED ([ConfigurationId] ASC)
+);
+
 CREATE TABLE [dbo].[wsrt_configuration_option] (
     [OptionId] INT IDENTITY (1, 1) NOT NULL,
 	
@@ -34,6 +44,16 @@ CREATE TABLE [dbo].[wsrt_configuration_option] (
     
 	CONSTRAINT [PK_wsrt_configuration_option] PRIMARY KEY CLUSTERED ([OptionId] ASC)
 );
+
+ALTER TABLE [dbo].[wsrt_configuration_option] 
+	ADD [ConfigurationId] INT NULL;
+
+ALTER TABLE [dbo].[wsrt_configuration_option] ADD CONSTRAINT
+	[FK_configuration_option_configuration] FOREIGN KEY ([ConfigurationId]) REFERENCES [dbo].[wsrt_configuration] ([ConfigurationId]);
+
+ALTER TABLE [dbo].[wsrt_configuration_option] 
+	ALTER COLUMN [ConfigurationId] INT NOT NULL;
+
 -- add unique constraint on parameters
 ALTER TABLE [dbo].[wsrt_configuration_option] ADD CONSTRAINT
 	[UC_wsrt_configuration_option_parameters] UNIQUE 
@@ -60,7 +80,8 @@ ALTER TABLE [dbo].[wsrt_configuration_option] ADD CONSTRAINT
 	[iWPR_Filter_Open_a],
 	[iWPR_Filter_Open_b],
 	[Price_Filter_Close],
-	[iWPR_Filter_Close]);
+	[iWPR_Filter_Close],
+	[ConfigurationId]);
 
 CREATE TABLE [dbo].[wsrt_run] (
 	[RunId] INT IDENTITY (1, 1) NOT NULL,
@@ -77,6 +98,15 @@ CREATE TABLE [dbo].[wsrt_run] (
 
 ALTER TABLE [dbo].[wsrt_run]
 	ADD CONSTRAINT [U_wsrt_run_name] UNIQUE ([Name]);
+
+ALTER TABLE [dbo].[wsrt_run] 
+	ADD [ConfigurationId] INT NULL;
+
+ALTER TABLE [dbo].[wsrt_run] ADD CONSTRAINT
+	[FK_run_configuration] FOREIGN KEY ([ConfigurationId]) REFERENCES [dbo].[wsrt_configuration] ([ConfigurationId]);
+
+ALTER TABLE [dbo].[wsrt_run] 
+	ALTER COLUMN [ConfigurationId] INT NOT NULL;
 
 --DROP TABLE [dbo].[wsrt_run_result]
 CREATE TABLE [dbo].[wsrt_run_result](
