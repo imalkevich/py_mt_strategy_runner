@@ -17,7 +17,7 @@ param_grid = {
     "MultiLotPercent": [1.1],
 
     #_Periods=Периоды индикаторов
-    "iMA_Period": range(50, 251, 1), # 75
+    "iMA_Period": range(349, 353, 2), # 75
     "iCCI_Period": [18], # 18
     "iATR_Period": [14], # 14
     "iWPR_Period": [11], # 11

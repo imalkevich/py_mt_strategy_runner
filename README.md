@@ -1,24 +1,43 @@
 This is an utility to collect MT4 experts reports.
 
 The idea is:
-1) Create configurations in dbo.wsrt_configuration_option table (if not exists);
+1) Create configuration in dbo.wsrt_configuration;
+1) Create configuration options in dbo.wsrt_configuration_option table (if not exists) and link them to dbo.wsrt_configuration;
 2) Create a run - entry in wsrt_run table (if not exists);
 3) Run terminals for a specific run from step #2 above.
 
 Prepare configurations:
+1) Add new entry to dbo.wsrt_configuration
 1) Open ./util/params.py file and edit 'param_grid' with needed ranges;
 2) Run ./prepare_configuration.py from cmd, like:
     - (optional) Activate conda environment if needed (see section below)
-    - When in directory, run "python prepare_configuration.py iMA_Period_50_251", where iMA_Period_50_251 is configuration name
+    - When in directory, run "python prepare_configuration.py iMA_Period_50_251", where iMA_Period_50_251 is configuration name (entry from step #1 above)
 
 Run terminals to collect reports:
 1) Install Microsoft ODBC Driver 13.1 (https://www.microsoft.com/download/details.aspx?id=53339). 
 Also install pyodbc module for python (either for conda - "conda install pyodbc", or using pip - "pip install pyodbc")
-2) Add new entry to dbo.wsrt_run if needed and remember 'Name' of the run (connection string is in config.yaml);
+2) Add new entry/entries to dbo.wsrt_run (connection string is in config.yaml);
+3) Insert new dbo.wsrt_run_result by running:
+    -- incremental insert
+    declare @runId int = 17
+    declare @runIdTo int = 105
+    declare @configurationId int = 2
+
+    WHILE @runId <= @runIdTo
+    BEGIN
+        INSERT INTO dbo.wsrt_run_result ([RunId], [OptionId])
+            SELECT @runId, OptionId FROM dbo.wsrt_configuration_option
+                WHERE
+                    ConfigurationId = @configurationId 
+                    AND OptionId NOT IN (SELECT OptionId FROM dbo.wsrt_run_result WHERE RunId = @runId)
+        -- check the amount of all configurations
+        -- select count(1) from dbo.wsrt_run_result where RunId = @runId
+        SELECT @runId = @runId + 1;
+    END
 3) Run script for execution:
     - (optional) Activate conda environment if needed (see section below)
-    - Run main.py with run Name(s) - comma separated list (see step #2 above), something like:
-        "python main.py GBPUSD_03012017_04012017"
+    - Run main.py with configuration id, something like:
+        "python main.py 2"
     - Wait for the script to complete. As long as it may take long, you might need to
         stop execution. In this case please refer to interruption section below.
 
@@ -29,11 +48,12 @@ How to activate proper conda environment:
     "activate root"
 
 How it works internally:
-1) List of available configuration is stored in dbo.wsrt_configuration_option table
+1) List of configurations is stored in dbo.wsrt_configuration;
+1) List of available configuration options linked to configuration is stored in dbo.wsrt_configuration_option table
 2) List of run is saved in dbo.wsrt_run table;
 3) To create a run results, you need to prepare dbo.wsrt_run_result table with needed configurations;
 4) Once srcipt is started, it will:
-    - Look for a run by run 'Name' provided as input
+    - Look for a runs by configurationid provided as input
     - Select not run configurations - for those where Run start datetime is NULL
     - Once configuration is run in MT terminal, script will parse report and store it in the database
 

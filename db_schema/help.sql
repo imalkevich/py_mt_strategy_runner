@@ -1,16 +1,19 @@
 select * from wsrt_configuration
-select count(1) from wsrt_configuration_option where ConfigurationId = 2
+select * from wsrt_configuration_option where ConfigurationId = 2
+
 select * from wsrt_run
-update wsrt_run set [Name] = 'GBPUSD_12012014_01012015_IMAPeriod' where RunId=45 
+update wsrt_run set [TestDateTo] = '2017.06.01' where RunId=106
 select count(1) from wsrt_run_result where RunFinishDateTimeUtc is not null
 select count(1) from wsrt_run_result where RunFinishDateTimeUtc is null
-select count(1) from wsrt_run_result where RunId = 69 and RunFinishDateTimeUtc is null
-select * from wsrt_run_result where RunId = 66 and RunFinishDateTimeUtc is not null 
+select count(1) from wsrt_run_result where RunId = 17 and RunFinishDateTimeUtc is null
+select * from wsrt_run_result where RunId = 106 and RunFinishDateTimeUtc is not null 
 
 select * from wsrt_run_result where RunStartDateTimeUtc is not null and RunFinishDateTimeUtc IS NULL
 update wsrt_run_result set RunStartDateTimeUtc = NULL WHERE RunStartDateTimeUtc is not null and RunFinishDateTimeUtc IS NULL
+--update wsrt_run_result set RunStartDateTimeUtc = NULL WHERE ResultId >= 47285 and ResultId <= 47288
+--delete wsrt_run_result where ResultId >= 38879 and ResultId <= 38886
 --delete from wsrt_configuration_option where OptionId > 73
---delete from wsrt_run_result where ResultId > 1
+--delete from wsrt_run_result where ResultId >= 34971
 --delete from wsrt_configuration_option
 
 select
@@ -19,10 +22,13 @@ select
 from wsrt_run_result
 where 
 	RunFinishDateTimeUtc is not null
-	and RunId = 67
+	and RunId = 92
 
+select * from wsrt_run
 select
 	rr.TotalNetProfit as TotalNetProfit,
+	rr.AbsoluteDrawdown,
+	rr.MaximalDrawdown,
 	rr.TotalTrades as TotalTrades,
 
 	op.TakeProfit as TakeProfit,
@@ -54,6 +60,6 @@ from
 	inner join wsrt_configuration_option op on rr.OptionId = op.OptionId
 where
 	rr.RunFinishDateTimeUtc IS NOT NULL
-	and rr.RunId = 16
-	and op.TakeProfit = 26
-	and (rr.TotalNetProfit < -4000.0 or rr.TotalNetProfit > 2000.0)
+	and rr.RunId = 20
+order by 
+	op.iMA_Period
