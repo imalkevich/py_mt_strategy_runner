@@ -2,3 +2,4 @@
 output/*
 util/__pycache__
 db/__pycache__
+config.yaml

@@ -60,6 +60,6 @@ from
 	inner join wsrt_configuration_option op on rr.OptionId = op.OptionId
 where
 	rr.RunFinishDateTimeUtc IS NOT NULL
-	and rr.RunId = 20
+	and rr.RunId = 106
 order by 
 	op.iMA_Period
