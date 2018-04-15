@@ -8,13 +8,13 @@ from .launch import ini_file_folder
 from .sets import set_file_folder
 from .report import report_file_folder
 
-def init_terminal(terminal_path):
+def init_terminal(data_path):
     """ """
     # remove directory before start to avoid pollution
-    #if os.path.isdir(os.path.join(terminal_path, RUNNER_FOLDER)):
-    #    shutil.rmtree(os.path.join(terminal_path, RUNNER_FOLDER))
+    #if os.path.isdir(os.path.join(data_path, RUNNER_FOLDER)):
+    #    shutil.rmtree(os.path.join(data_path, RUNNER_FOLDER))
 
-    os.makedirs(os.path.join(terminal_path, RUNNER_FOLDER), exist_ok=True)
-    os.makedirs(os.path.join(terminal_path, RUNNER_FOLDER, ini_file_folder), exist_ok=True)
-    os.makedirs(os.path.join(terminal_path, RUNNER_FOLDER, set_file_folder), exist_ok=True)
-    os.makedirs(os.path.join(terminal_path, RUNNER_FOLDER, report_file_folder), exist_ok=True)
+    os.makedirs(os.path.join(data_path, RUNNER_FOLDER), exist_ok=True)
+    os.makedirs(os.path.join(data_path, RUNNER_FOLDER, ini_file_folder), exist_ok=True)
+    os.makedirs(os.path.join(data_path, RUNNER_FOLDER, set_file_folder), exist_ok=True)
+    os.makedirs(os.path.join(data_path, RUNNER_FOLDER, report_file_folder), exist_ok=True)

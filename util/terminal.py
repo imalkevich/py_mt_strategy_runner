@@ -2,4 +2,4 @@
 
 from .config import config
 
-TERMINAL_POOL = config.get("terminal", "pool").split(",")
+TERMINAL_POOL = [{'exe_path': t[0], 'data_path': t[1] } for t in [t.split('|') for t in config.get("terminal", "pool").split(",")]]

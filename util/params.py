@@ -17,7 +17,7 @@ param_grid = {
     "MultiLotPercent": [1.1],
 
     #_Periods=Периоды индикаторов
-    "iMA_Period": range(349, 353, 2), # 75
+    "iMA_Period": range(75, 76, 1), # 75
     "iCCI_Period": [18], # 18
     "iATR_Period": [14], # 14
     "iWPR_Period": [11], # 11
@@ -42,11 +42,11 @@ feature_names = list(param_grid.keys())
 
 set_Template = Template('''Name=WallStreet Forex Robot ver. 3.8.5 FINAL (Pirate Edition)
 Copy=Copyright © HELLTEAM^Pirat
-Op2=Оптимизация для пары
+Op2=Optimization for pair
 Symbol_Op=EURUSD m15
-Op=Дата оптимизации
+Op=Date of optimization
 Date=1305158400
-_TP=Основные входные параметры
+_TP=Main input parameters
 TakeProfit=${TakeProfit}
 TakeProfit,F=0
 TakeProfit,1=${TakeProfit}
@@ -82,7 +82,7 @@ MaxLossPoints,F=0
 MaxLossPoints,1=${MaxLossPoints}
 MaxLossPoints,2=0
 MaxLossPoints,3=0
-_MM=Настройка MM
+_MM=Configuration for MM
 RecoveryMode=${RecoveryMode}
 RecoveryMode,F=0
 RecoveryMode,1=${RecoveryMode}
@@ -118,7 +118,7 @@ MultiLotPercent,F=0
 MultiLotPercent,1=${MultiLotPercent}
 MultiLotPercent,2=0.00000000
 MultiLotPercent,3=0.00000000
-_Periods=Периоды индикаторов
+_Periods=Indicator periods
 iMA_Period=${iMA_Period}
 iMA_Period,F=0
 iMA_Period,1=${iMA_Period}
@@ -139,7 +139,7 @@ iWPR_Period,F=0
 iWPR_Period,1=${iWPR_Period}
 iWPR_Period,2=0
 iWPR_Period,3=0
-_Add_Op=Расширенные параметры оптимизации
+_Add_Op=Extended parameters optimization
 _AddOpenFilters=---
 FilterATR=${FilterATR}
 FilterATR,F=0
@@ -183,7 +183,7 @@ iWPR_Filter_Close,F=0
 iWPR_Filter_Close,1=${iWPR_Filter_Close}
 iWPR_Filter_Close,2=0
 iWPR_Filter_Close,3=0
-_Add=Расширенные настройки
+_Add=Extended parameters
 LongTrade=1
 LongTrade,F=0
 LongTrade,1=0

@@ -25,7 +25,7 @@ RUNS = get_by_configuration_id(CONFIGURATION_ID)
 #RUN_NAMES = [name.strip() for name in sys.argv[1].split(",")]
 
 for terminal in TERMINAL_POOL:
-    init_terminal(terminal)
+    init_terminal(terminal['data_path'])
 
 for run in RUNS:
     run_id = run['RunId']
@@ -57,18 +57,21 @@ for run in RUNS:
             elif run_result is None:
                 break
 
-            terminal_idx = idx % len(TERMINAL_POOL)
-            terminal_path = TERMINAL_POOL[terminal_idx]
             config = get_option_by_id(run_result['OptionId'])
             run_result_id = run_result['ResultId']
-            set_file_name = create_set_file(terminal_path, config, run_result_id)
-            ini_file = create_ini_file(terminal_path, run_result_id,
+
+            terminal_idx = idx % len(TERMINAL_POOL)
+            terminal  = TERMINAL_POOL[terminal_idx]
+            terminal_path = terminal['exe_path']
+            data_path = terminal['data_path']
+            set_file_name = create_set_file(data_path, config, run_result_id)
+            ini_file = create_ini_file(data_path, run_result_id,
                                        date_from, date_to, symbol, set_file_name)
             cmd = COMMAND_TEMPLATE.format(terminal_path, ini_file)
             commands.append(cmd)
 
             # for result processing
-            results[terminal_path] = run_result_id
+            results[data_path] = run_result_id
 
         if number_of_waits >= MAX_WAITS_COUNT:
             print("Stop waiting for configurations to process")

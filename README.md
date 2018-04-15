@@ -10,13 +10,13 @@ Prepare configurations:
 1) Add new entry to dbo.wsrt_configuration
 1) Open ./util/params.py file and edit 'param_grid' with needed ranges;
 2) Run ./prepare_configuration.py from cmd, like:
-    - (optional) Activate conda environment if needed (see section below)
     - When in directory, run "python prepare_configuration.py iMA_Period_50_251", where iMA_Period_50_251 is configuration name (entry from step #1 above)
 
 Run terminals to collect reports:
 1) Install Microsoft ODBC Driver 13.1 (https://www.microsoft.com/download/details.aspx?id=53339). 
-Also install pyodbc module for python (either for conda - "conda install pyodbc", or using pip - "pip install pyodbc")
-2) Add new entry/entries to dbo.wsrt_run (connection string is in config.yaml);
+Also install pyodbc module for python (pip install pyodbc)
+2) Add new entry/entries to dbo.wsrt_run (connection string is in config.yaml)
+    
 3) Insert new dbo.wsrt_run_result by running:
     -- incremental insert
     declare @runId int = 17
@@ -35,17 +35,15 @@ Also install pyodbc module for python (either for conda - "conda install pyodbc"
         SELECT @runId = @runId + 1;
     END
 3) Run script for execution:
-    - (optional) Activate conda environment if needed (see section below)
     - Run main.py with configuration id, something like:
         "python main.py 2"
     - Wait for the script to complete. As long as it may take long, you might need to
         stop execution. In this case please refer to interruption section below.
 
-How to activate proper conda environment:
-1) Run the following comman to list available environments:
-    "conda info --envs"
-2) Activate needed environment using, for example:
-    "activate root"
+How to create environment:
+>> cd py_mt_strategy_runner
+>> virtualenv --python python venv
+>> source venv/Scripts/activate
 
 How it works internally:
 1) List of configurations is stored in dbo.wsrt_configuration;
