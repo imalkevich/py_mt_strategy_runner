@@ -130,3 +130,20 @@ CREATE TABLE [dbo].[wsrt_run_result](
 	CONSTRAINT [FK_run_result_run] FOREIGN KEY ([RunId]) REFERENCES [dbo].[wsrt_run] ([RunId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_run_result_configuration_option] FOREIGN KEY ([OptionId]) REFERENCES [dbo].[wsrt_configuration_option] ([OptionId]) ON DELETE CASCADE
 );
+
+CREATE TABLE [dbo].[wsrt_run_result_trade](
+	TradeId INT IDENTITY (1, 1) NOT NULL,
+	ResultId INT NOT NULL,
+
+	[OpenTime] DATETIME2 (7) NULL,
+	[Type] NVARCHAR(32) NULL,
+	[Size] DECIMAL(10,2) NULL,
+	[OpenPrice] DECIMAL(10,2) NULL,
+	[StopLoss] DECIMAL(10,2) NULL,
+	[TakeProfit] DECIMAL(10,2) NULL,
+	[CloseTime] DATETIME2 (7) NOT NULL,
+	[Profit] DECIMAL(10,2) NOT NULL,
+	[Balance] DECIMAL(10,2) NULL,
+
+	CONSTRAINT [FK_run_result_trade_run_result] FOREIGN KEY ([ResultId]) REFERENCES [dbo].[wsrt_run_result] ([ResultId]) ON DELETE CASCADE,
+);

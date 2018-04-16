@@ -5,9 +5,11 @@
 import inspect
 import os
 import unittest
+import unittest.mock as mock
 
 from datetime import datetime
 
+from db.run_result import add_run_result_trade
 from util.result_extractor import prepare_results
 
 class ResultExtractorTestCase(unittest.TestCase):
@@ -52,6 +54,25 @@ class ResultExtractorTestCase(unittest.TestCase):
             { 'Time': datetime(2018, 1, 30, 11, 38, 0), 'Profit': 22.30 },
         ]
         self.assertEqual(report['Trades'], trades)
+
+class DatabaseTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_add_run_result_trade(self):
+        # arrange
+        mock_cursor = mock.MagicMock()
+        trade = { 'Time': 'someTime', 'Profit': 'someProfit' }
+        
+        # act
+        add_run_result_trade(mock_cursor, 'testResultId', trade)
+
+        # assert
+        mock_cursor.execute.assert_called_with(mock.ANY, 'testResultId', 'someTime', 'someProfit')
+
 
 
 if __name__ == '__main__':

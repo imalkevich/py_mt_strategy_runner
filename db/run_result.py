@@ -97,15 +97,37 @@ def update_run_result_with_report(report):
     WHERE
         [ResultId] = ?
     """
-    with cursor.execute(tsql,
-                        Decimal(report['TotalNetProfit']) if report['TotalNetProfit'] is not None else None,
-                        Decimal(report['GrossProfit']) if report['GrossProfit'] is not None else None,
-                        Decimal(report['GrossLoss']) if report['GrossLoss'] is not None else None,
-                        Decimal(report['ProfitFactor']) if report['ProfitFactor'] is not None else None,
-                        Decimal(report['ExpectedPayoff']) if report['ExpectedPayoff'] is not None else None,
-                        Decimal(report['AbsoluteDrawdown']) if report['AbsoluteDrawdown'] is not None else None,
-                        Decimal(report['MaximalDrawdown']) if report['MaximalDrawdown'] is not None else None,
-                        int(report['TotalTrades']) if report['TotalTrades'] is not None else None,
-                        datetime.utcnow(),
-                        report['ResultId']):
-        _cnxn.commit()
+    cursor.execute(tsql,
+                    Decimal(report['TotalNetProfit']) if report['TotalNetProfit'] is not None else None,
+                    Decimal(report['GrossProfit']) if report['GrossProfit'] is not None else None,
+                    Decimal(report['GrossLoss']) if report['GrossLoss'] is not None else None,
+                    Decimal(report['ProfitFactor']) if report['ProfitFactor'] is not None else None,
+                    Decimal(report['ExpectedPayoff']) if report['ExpectedPayoff'] is not None else None,
+                    Decimal(report['AbsoluteDrawdown']) if report['AbsoluteDrawdown'] is not None else None,
+                    Decimal(report['MaximalDrawdown']) if report['MaximalDrawdown'] is not None else None,
+                    int(report['TotalTrades']) if report['TotalTrades'] is not None else None,
+                    datetime.utcnow(),
+                    report['ResultId'])
+
+    for trade in report['Trades']:
+        add_run_result_trade(cursor, report['ResultId'], trade)
+
+    cursor.close()
+    del cursor
+    _cnxn.commit()
+
+def add_run_result_trade(cursor, result_id, trade):
+    tsql = """
+    INSERT INTO [dbo].[wsrt_run_result_trade]
+    (
+        [ResultId],
+        [CloseTime],
+        [Profit]
+    )
+    VALUES
+    (
+        ?,?,?
+    )
+    """
+
+    cursor.execute(tsql, result_id, trade['Time'], trade['Profit'])
