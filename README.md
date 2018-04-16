@@ -11,6 +11,7 @@ command line utility to collect MT4 experts reports.
     :target: https://codecov.io/github/imalkevich/py_mt_strategy_runner
     :alt: codecov.io
 
+
 The idea is:
 1) Create configuration in dbo.wsrt_configuration;
 1) Create configuration options in dbo.wsrt_configuration_option table (if not exists) and link them to dbo.wsrt_configuration;
