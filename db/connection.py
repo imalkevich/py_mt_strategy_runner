@@ -3,6 +3,7 @@
 import pyodbc
 from util.config import config
 
+_cnxn = None
 if config.has_section("mssql"):
     _server = config.get('mssql', 'server')
     _database = config.get('mssql', 'database')
