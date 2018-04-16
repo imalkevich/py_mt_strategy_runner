@@ -4,4 +4,5 @@ import io
 import os
 
 config = configparser.ConfigParser()
-config.read(os.path.dirname(__file__) + "/../config.yaml")
+if os.path.isfile(os.path.dirname(__file__) + "/../config.yaml"):
+    config.read(os.path.dirname(__file__) + "/../config.yaml")
