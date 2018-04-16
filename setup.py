@@ -63,6 +63,8 @@ setup(
         ]
     },
     install_requires=[
-        'pyodbc'
+        'pyodbc',
+        'pyquery'
     ] + extra_dependencies(),
+    test_require = ['coverage', 'codecov']
 )

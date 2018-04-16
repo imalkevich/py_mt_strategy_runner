@@ -1,4 +1,15 @@
-This is an utility to collect MT4 experts reports.
+errorguimonitor
+====================================================
+
+command line utility to collect MT4 experts reports.
+-------------------------------------------
+
+.. image:: https://secure.travis-ci.org/imalkevich/py_mt_strategy_runner.png?branch=master
+        :target: https://travis-ci.org/imalkevich/py_mt_strategy_runner
+
+.. image:: https://codecov.io/github/imalkevich/py_mt_strategy_runner/coverage.svg?branch=master
+    :target: https://codecov.io/github/imalkevich/py_mt_strategy_runner
+    :alt: codecov.io
 
 The idea is:
 1) Create configuration in dbo.wsrt_configuration;

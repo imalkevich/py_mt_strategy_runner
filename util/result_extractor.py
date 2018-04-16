@@ -1,14 +1,19 @@
 """ extract results and store them in csv file """
 
+import os
 import re
-import glob
-from os import path
+
+from datetime import datetime
+
 from .report import report_file_name_template, report_file_folder
 from .params import RUNNER_FOLDER
+from pyquery import PyQuery as pq
 
 reNumber = r'([-+]?\d+[.]?\d*)'
 reNumberWithPercent = r'([-+]?\d+[.]?\d*) (\([-+]?\d+[.]?\d*%\))'
 reBoolean = r'(true|false)'
+
+TRADE_DATETIME_FORMAT = '%Y.%m.%d %H:%M'
 
 dict_params = {
     'TakeProfit': r'TakeProfit='+reNumber,
@@ -50,11 +55,12 @@ dict_params = {
 def prepare_results(terminals):
     """ prepare report from result files """
     results = []
-    for terminal_path, result_id in terminals.items():
-        report_folder = path.join(terminal_path, report_file_name_template
+    for data_path, result_id in terminals.items():
+        report_file_name = os.path.join(data_path, report_file_name_template
                                   .format(RUNNER_FOLDER, report_file_folder, result_id))
-        for report_file in glob.glob(report_folder):
-            lines = ''.join(open(report_file, 'r').readlines())
+
+        if os.path.isfile(report_file_name):
+            lines = ''.join(open(report_file_name, 'r').readlines())
             data = dict()
             data['ResultId'] = result_id
             for k, val in dict_params.items():
@@ -63,6 +69,20 @@ def prepare_results(terminals):
                     data[k] = search.group(1)
                 else:
                     data[k] = None
+
+            trades = []
+            html = pq(lines)
+            rows = html('table:eq(1) tr')
+            for row in rows:
+                row = pq(row)
+                profit_text = row('td:eq(8)').text().strip()
+                if len(profit_text) and re.search(reNumber, profit_text) != None:
+                    trade_time = datetime.strptime(row('td:eq(1)').text().strip(), TRADE_DATETIME_FORMAT)
+                    profit = float(profit_text)
+                    trades.append({ 'Time': trade_time, 'Profit': profit })
+
+            data['Trades'] = trades
+
             results.append(data)
 
     return results
