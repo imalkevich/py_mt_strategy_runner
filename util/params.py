@@ -10,14 +10,14 @@ param_grid = {
     "SecureProfitTriger": [10], # 10
     "MaxLossPoints": [-65],
     "RecoveryMode": [0],
-    "FixedLot": [1.0],
-    "AutoMM": [20.0],
-    "AutoMM_Max": [20.0],
+    "FixedLot": [0.1],
+    "AutoMM": [0.0],
+    "AutoMM_Max": [0.0],
     "Risk": [25.0],
-    "MultiLotPercent": [1.1],
+    "MultiLotPercent": [1.0],
 
     #_Periods=Периоды индикаторов
-    "iMA_Period": range(75, 76, 1), # 75
+    "iMA_Period": range(50, 251, 10), # 75
     "iCCI_Period": [18], # 18
     "iATR_Period": [14], # 14
     "iWPR_Period": [11], # 11

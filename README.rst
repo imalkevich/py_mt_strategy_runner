@@ -14,23 +14,21 @@ command line utility to collect MT4 experts reports.
 Idea
 ----
 
-1) Create configuration in dbo.wsrt_configuration;
-1) Create configuration options in dbo.wsrt_configuration_option table (if not exists) and link them to dbo.wsrt_configuration;
-2) Create a run - entry in wsrt_run table (if not exists);
-3) Run terminals for a specific run from step #2 above.
+1) Create configuration in dbo.wsrt_configuration:
+    INSERT INTO dbo.wsrt_configuration ([Name], [Description])
+	    VALUES ('{Configuration name}', '{Description}');
 
-Prepare configurations:
-1) Add new entry to dbo.wsrt_configuration
-1) Open ./util/params.py file and edit 'param_grid' with needed ranges;
-2) Run ./prepare_configuration.py from cmd, like:
-    - When in directory, run "python prepare_configuration.py iMA_Period_50_251", where iMA_Period_50_251 is configuration name (entry from step #1 above)
+2) Prepare configurations:
+    - Open ./util/params.py file and edit 'param_grid' with needed ranges;
+    - Run ./prepare_configuration.py from cmd, like:
+        "python prepare_configuration.py iMA_Period_50_251", where iMA_Period_50_251 is configuration name (entry from step #1 above)
 
-Run terminals to collect reports:
-1) Install Microsoft ODBC Driver 13.1 (https://www.microsoft.com/download/details.aspx?id=53339). 
-Also install pyodbc module for python (pip install pyodbc)
-2) Add new entry/entries to dbo.wsrt_run (connection string is in config.yaml)
+2) Create a run - entry in wsrt_run table (if not exists) by running the following SQL:
+    INSERT INTO dbo.wsrt_run ([Name], [TestSymbol], [TestDateFrom], [TestDateTo], [Description], [ConfigurationId])
+	VALUES
+		('GBPUSD_05012017_06012017_IMAPeriod', 'GBPUSD', '2017.05.01', '2017.06.01', 'GBPUSD for May 2017', 2);
     
-3) Insert new dbo.wsrt_run_result by running:
+3) Insert new dbo.wsrt_run_result by running (take @runId from step #2):
     -- incremental insert
     declare @runId int = 17
     declare @runIdTo int = 105
@@ -47,11 +45,27 @@ Also install pyodbc module for python (pip install pyodbc)
         -- select count(1) from dbo.wsrt_run_result where RunId = @runId
         SELECT @runId = @runId + 1;
     END
-3) Run script for execution:
-    - Run main.py with configuration id, something like:
-        "python main.py 2"
-    - Wait for the script to complete. As long as it may take long, you might need to
-        stop execution. In this case please refer to interruption section below.
+
+4) Make sure config.yaml has database connection string and terminals, like:
+    ; configuration
+    [mssql]
+    server = {database_server}
+    database = {database_name}
+    username  = {user_name}
+    password = {password}
+
+    [terminal]
+    pool = {exe file folder}|{data path folder}
+
+5) Run main script:
+    "python main.py {configurationId} [refresh]"
+    
+    Where configurationId from step #1, 'refresh' is optional (if exists will delede related records from 
+    wsrt_run_result_trade, and update wsrt_run_result.RunStartDateTimeUtc to NULL)
+
+Run terminals to collect reports:
+Installing Microsoft ODBC Driver 13.1 might be required (https://www.microsoft.com/download/details.aspx?id=53339). 
+Also install pyodbc module for python (pip install pyodbc)
 
 How to create environment:
 >> cd py_mt_strategy_runner
@@ -76,6 +90,8 @@ The approach for running MT4 is simple:
 4) Once the process is finishe, pick report.html file, parse it, send data to database.
 
 Interruption during run:
+------------------------
+
 1) As long as script might take a long time to run (days), it is nesessary to make the
 whole approach tolerant for such interruptions;
 2) The script is design with this in mind, so whenever you need to stop it - close the window, and that should be it;

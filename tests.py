@@ -9,7 +9,7 @@ import unittest.mock as mock
 
 from datetime import datetime
 
-from db.run_result import add_run_result_trade
+from db.run_result import add_run_result_trade, remove_run_result_trades_by_configuration_id, reset_run_results_by_configuration_id
 from util.result_extractor import prepare_results
 
 class ResultExtractorTestCase(unittest.TestCase):
@@ -73,7 +73,37 @@ class DatabaseTestCase(unittest.TestCase):
         # assert
         mock_cursor.execute.assert_called_with(mock.ANY, 'testResultId', 'someTime', 'someProfit')
 
+    @mock.patch('db.run_result._get_connection')
+    def test_remove_run_result_trades_by_configuration_id(self, mock_get_connection):
+        # arrange
+        mock_cursor = mock.MagicMock()
+        mock_connection = mock.MagicMock()
+        mock_connection.cursor = mock.MagicMock(return_value=mock_cursor)
+        mock_get_connection.return_value = mock_connection
 
+        # act
+        remove_run_result_trades_by_configuration_id('fake_configuration_id')
+
+        # assert
+        mock_cursor.execute.assert_called_with(mock.ANY, 'fake_configuration_id')
+        mock_cursor.close.assert_called_once()
+        mock_connection.commit.assert_called_once()
+
+    @mock.patch('db.run_result._get_connection')
+    def test_reset_run_results_by_configuration_id(self, mock_get_connection):
+        # arrange
+        mock_cursor = mock.MagicMock()
+        mock_connection = mock.MagicMock()
+        mock_connection.cursor = mock.MagicMock(return_value=mock_cursor)
+        mock_get_connection.return_value = mock_connection
+
+        # act
+        reset_run_results_by_configuration_id('fake_configuration_id')
+
+        # assert
+        mock_cursor.execute.assert_called_with(mock.ANY, 'fake_configuration_id')
+        mock_cursor.close.assert_called_once()
+        mock_connection.commit.assert_called_once()
 
 if __name__ == '__main__':
     unittest.main()

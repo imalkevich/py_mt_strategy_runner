@@ -12,6 +12,7 @@ from util.terminal import TERMINAL_POOL
 from util.result_extractor import prepare_results
 from db.run import get_by_configuration_id
 from db.run_result import get_for_processing_by_run_id, update_run_result_with_report
+from db.run_result import remove_run_result_trades_by_configuration_id, reset_run_results_by_configuration_id
 from db.configuration_option import get_option_by_id
 
 COMMAND_TEMPLATE = '"{}\\terminal.exe" "{}"'
@@ -21,6 +22,14 @@ START_TIME = datetime.now()
 print("start running terminals {} ...".format(datetime.strftime(START_TIME, "%b %d %y %H:%M:%S %Z")))
 
 CONFIGURATION_ID = int(sys.argv[1])
+
+if len(sys.argv) > 2:
+    EXTRA_OPTION = sys.argv[2]
+    if EXTRA_OPTION is not None and EXTRA_OPTION == 'refresh':
+        remove_run_result_trades_by_configuration_id(CONFIGURATION_ID)
+        reset_run_results_by_configuration_id(CONFIGURATION_ID)
+        print('reset for configuration {} has been performed...'.format(CONFIGURATION_ID))
+
 RUNS = get_by_configuration_id(CONFIGURATION_ID)
 #RUN_NAMES = [name.strip() for name in sys.argv[1].split(",")]
 

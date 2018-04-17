@@ -6,6 +6,9 @@ from .connection import get_connection
 
 _cnxn = get_connection()
 
+def _get_connection():
+    return _cnxn
+
 def insert(result):
     cursor = _cnxn.cursor()
 
@@ -131,3 +134,39 @@ def add_run_result_trade(cursor, result_id, trade):
     """
 
     cursor.execute(tsql, result_id, trade['Time'], trade['Profit'])
+
+def remove_run_result_trades_by_configuration_id(configuration_id):
+    tsql = """
+    DELETE FROM dbo.wsrt_run_result_trade
+    WHERE [ResultId] IN 
+        (SELECT rr.[ResultId] FROM dbo.wsrt_run_result rr WHERE rr.[RunId] IN
+            (SELECT r.[RunId] FROM dbo.wsrt_run r WHERE r.[ConfigurationId] = ?)
+        )
+    """
+    cnxn = _get_connection()
+    cursor = cnxn.cursor()
+
+    cursor.execute(tsql, configuration_id)
+
+    cursor.close()
+    del cursor
+    cnxn.commit()
+
+def reset_run_results_by_configuration_id(configuration_id):
+    tsql = """
+    UPDATE 
+        dbo.wsrt_run_result
+    SET
+        [RunStartDateTimeUtc] = NULL
+    WHERE 
+        [RunId] IN 
+        (SELECT r.[RunId] FROM dbo.wsrt_run r WHERE r.[ConfigurationId] = ?)
+    """
+    cnxn = _get_connection()
+    cursor = cnxn.cursor()
+
+    cursor.execute(tsql, configuration_id)
+
+    cursor.close()
+    del cursor
+    cnxn.commit()
