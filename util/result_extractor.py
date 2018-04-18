@@ -60,7 +60,9 @@ def prepare_results(terminals):
                                   .format(RUNNER_FOLDER, report_file_folder, result_id))
 
         if os.path.isfile(report_file_name):
-            lines = ''.join(open(report_file_name, 'r').readlines())
+            lines = ''
+            with open(report_file_name, 'r') as f:
+                lines = ''.join(f.readlines())
             data = dict()
             data['ResultId'] = result_id
             for k, val in dict_params.items():

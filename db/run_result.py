@@ -1,5 +1,7 @@
 """ configuration run result """
 
+import pandas
+
 from datetime import datetime
 from decimal import Decimal
 from .connection import get_connection
@@ -83,6 +85,25 @@ def get_for_processing_by_run_id(run_id):
 
     return run_result
 
+def get_completed_run_results_by_configuration_id(configuration_id):
+    tsql = """
+    SELECT rr.* from dbo.wsrt_run_result rr
+    WHERE
+        rr.RunId 
+        IN (SELECT r.RunId FROM dbo.wsrt_run r WHERE r.ConfigurationId = ?)
+        AND rr.RunFinishDateTimeUtc IS NOT NULL
+    """
+    cnxn = _get_connection()
+    cursor = cnxn.cursor()
+    cursor.execute(tsql, configuration_id)
+
+    rows = [dict(zip([column[0] for column in cursor.description], row)) for row in cursor.fetchall()]
+
+    cursor.close()
+    del cursor
+
+    return rows
+
 def update_run_result_with_report(report):
     """ """
     cursor = _cnxn.cursor()
@@ -134,6 +155,29 @@ def add_run_result_trade(cursor, result_id, trade):
     """
 
     cursor.execute(tsql, result_id, trade['Time'], trade['Profit'])
+
+def get_run_result_trades_by_result_id(result_id):
+    tsql = """
+    SELECT 
+        rrt.* 
+    FROM 
+        dbo.wsrt_run_result_trade rrt
+    WHERE
+        rrt.ResultId = ?
+    ORDER BY
+        rrt.CloseTime ASC
+    """
+    cnxn = _get_connection()
+    cursor = cnxn.cursor()
+    cursor.execute(tsql, result_id)
+
+    rows = [dict(zip([column[0] for column in cursor.description], row)) for row in cursor.fetchall()]
+    df = pandas.DataFrame(rows)
+
+    cursor.close()
+    del cursor
+
+    return df
 
 def remove_run_result_trades_by_configuration_id(configuration_id):
     tsql = """

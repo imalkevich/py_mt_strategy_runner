@@ -57,11 +57,24 @@ Idea
     [terminal]
     pool = {exe file folder}|{data path folder}
 
-5) Run main script:
+5) Run main script to collect MT4 results and store them into database:
     "python main.py {configurationId} [refresh]"
     
     Where configurationId from step #1, 'refresh' is optional (if exists will delede related records from 
     wsrt_run_result_trade, and update wsrt_run_result.RunStartDateTimeUtc to NULL)
+
+6) Run the following command to perform analysis and predictions for a configuration:
+    python -m machine_learning.analytics
+    usage: analytics.py [-h] [-cid CONFIGURATION_ID] [-v]
+
+    predict future trades of different configuration options
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -cid CONFIGURATION_ID, --configuration_id CONFIGURATION_ID
+                            configuration id
+    -v, --version         displays the current version of analytics module
+
 
 Run terminals to collect reports:
 Installing Microsoft ODBC Driver 13.1 might be required (https://www.microsoft.com/download/details.aspx?id=53339). 

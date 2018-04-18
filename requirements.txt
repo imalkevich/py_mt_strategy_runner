@@ -1,4 +1,8 @@
 codecov==2.0.15
 coverage==4.5.1
+keras==2.1.5
+numpy==1.14.2
+pandas==0.22.0 
 pyodbc==4.0.23
 pyquery==1.4.0
+tensorflow==1.7.0 

@@ -4,12 +4,19 @@
 
 import inspect
 import os
+import pandas
 import unittest
 import unittest.mock as mock
 
 from datetime import datetime
+from pandas.util.testing import assert_frame_equal
 
 from db.run_result import add_run_result_trade, remove_run_result_trades_by_configuration_id, reset_run_results_by_configuration_id
+from db.run_result import get_completed_run_results_by_configuration_id
+from db.run_result import get_run_result_trades_by_result_id
+
+from machine_learning.analytics import TradeResultPredictor
+
 from util.result_extractor import prepare_results
 
 class ResultExtractorTestCase(unittest.TestCase):
@@ -104,6 +111,62 @@ class DatabaseTestCase(unittest.TestCase):
         mock_cursor.execute.assert_called_with(mock.ANY, 'fake_configuration_id')
         mock_cursor.close.assert_called_once()
         mock_connection.commit.assert_called_once()
+
+    @mock.patch('db.run_result._get_connection')
+    def test_get_completed_run_results_by_configuration_id(self, mock_get_connection):
+        # arrange
+        mock_cursor = mock.MagicMock()
+        mock_cursor.description = ((['col1']), (['col2']))
+        mock_cursor.fetchall = mock.MagicMock(return_value=((['row1_col1_result', 'row1_col2_result']), (['row2_col1_result', 'row2_col2_result'])))
+        mock_connection = mock.MagicMock()
+        mock_connection.cursor = mock.MagicMock(return_value=mock_cursor)
+        mock_get_connection.return_value = mock_connection
+
+        # act
+        rows = get_completed_run_results_by_configuration_id('fake_configuration_id')
+
+        # assert
+        self.assertEqual(rows, [{'col1': 'row1_col1_result', 'col2': 'row1_col2_result'}, {'col1': 'row2_col1_result', 'col2': 'row2_col2_result'}])
+        mock_cursor.execute.assert_called_with(mock.ANY, 'fake_configuration_id')
+        mock_cursor.fetchall.assert_called_once()
+        mock_cursor.close.assert_called_once()
+
+    @mock.patch('db.run_result._get_connection')
+    def test_get_run_result_trades_by_result_id(self, mock_get_connection):
+        # arrange
+        mock_cursor = mock.MagicMock()
+        mock_cursor.description = ((['col1']), (['col2']))
+        mock_cursor.fetchall = mock.MagicMock(return_value=((['row1_col1_result', 'row1_col2_result']), (['row2_col1_result', 'row2_col2_result'])))
+        mock_connection = mock.MagicMock()
+        mock_connection.cursor = mock.MagicMock(return_value=mock_cursor)
+        mock_get_connection.return_value = mock_connection
+
+        # act
+        df = get_run_result_trades_by_result_id('fake_result_id')
+
+        # assert
+        expected_df = pandas.DataFrame([
+            {'col1': 'row1_col1_result', 'col2': 'row1_col2_result'}, 
+            {'col1': 'row2_col1_result', 'col2': 'row2_col2_result'}
+        ])
+        assert_frame_equal(df, expected_df)
+        mock_cursor.execute.assert_called_with(mock.ANY, 'fake_result_id')
+        mock_cursor.fetchall.assert_called_once()
+        mock_cursor.close.assert_called_once()
+
+class TradeResultPredictorTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_run(self):
+        # arrange
+        predictor = TradeResultPredictor(3)
+
+        # act
+        predictor.run()
 
 if __name__ == '__main__':
     unittest.main()

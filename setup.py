@@ -63,8 +63,12 @@ setup(
         ]
     },
     install_requires=[
+        'keras',
+        'numpy',
+        'pandas',
         'pyodbc',
-        'pyquery'
+        'pyquery',
+        'tensorflow'
     ] + extra_dependencies(),
     test_require = ['coverage', 'codecov']
 )
