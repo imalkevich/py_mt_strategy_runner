@@ -65,6 +65,7 @@ setup(
     install_requires=[
         'keras',
         'numpy',
+        'PTable',
         'pandas',
         'pyodbc',
         'pyquery',

@@ -1,5 +1,8 @@
 """ main.py """
 
+__version__ = '0.2'
+
+import argparse
 import os
 import sys
 import time
@@ -15,89 +18,136 @@ from db.run_result import get_for_processing_by_run_id, update_run_result_with_r
 from db.run_result import remove_run_result_trades_by_configuration_id, reset_run_results_by_configuration_id
 from db.configuration_option import get_option_by_id
 
-COMMAND_TEMPLATE = '"{}\\terminal.exe" "{}"'
-MAX_WAITS_COUNT = 1
+from machine_learning.analytics import TradeResultPredictor
 
-START_TIME = datetime.now()
-print("start running terminals {} ...".format(datetime.strftime(START_TIME, "%b %d %y %H:%M:%S %Z")))
+def run(configuration_id, refresh, predict):
+    COMMAND_TEMPLATE = '"{}\\terminal.exe" "{}"'
+    MAX_WAITS_COUNT = 1
 
-CONFIGURATION_ID = int(sys.argv[1])
+    START_TIME = datetime.now()
+    print("start running terminals {} ...".format(datetime.strftime(START_TIME, "%b %d %y %H:%M:%S %Z")))
 
-if len(sys.argv) > 2:
-    EXTRA_OPTION = sys.argv[2]
-    if EXTRA_OPTION is not None and EXTRA_OPTION == 'refresh':
-        remove_run_result_trades_by_configuration_id(CONFIGURATION_ID)
-        reset_run_results_by_configuration_id(CONFIGURATION_ID)
-        print('reset for configuration {} has been performed...'.format(CONFIGURATION_ID))
+    if refresh == True:
+        remove_run_result_trades_by_configuration_id(configuration_id)
+        reset_run_results_by_configuration_id(configuration_id)
+        print('reset for configuration {} has been performed...'.format(configuration_id))
 
-RUNS = get_by_configuration_id(CONFIGURATION_ID)
-#RUN_NAMES = [name.strip() for name in sys.argv[1].split(",")]
+    RUNS = get_by_configuration_id(configuration_id)
+    #RUN_NAMES = [name.strip() for name in sys.argv[1].split(",")]
 
-for terminal in TERMINAL_POOL:
-    init_terminal(terminal['data_path'])
+    for terminal in TERMINAL_POOL:
+        init_terminal(terminal['data_path'])
 
-for run in RUNS:
-    run_id = run['RunId']
-    run_name = run['Name']
-    symbol = run['TestSymbol']
-    date_from = run['TestDateFrom']
-    date_to = run['TestDateTo']
+    for run in RUNS:
+        run_id = run['RunId']
+        run_name = run['Name']
+        symbol = run['TestSymbol']
+        date_from = run['TestDateFrom']
+        date_to = run['TestDateTo']
 
-    number_of_waits = 0
+        number_of_waits = 0
 
-    while True:
-        # run batch of commands equal to number of terminals
-        commands = []
-        results = dict()
+        while True:
+            # run batch of commands equal to number of terminals
+            commands = []
+            results = dict()
 
-        for idx in range(len(TERMINAL_POOL)):
-            run_result = get_for_processing_by_run_id(run_id)
+            for idx in range(len(TERMINAL_POOL)):
+                run_result = get_for_processing_by_run_id(run_id)
 
-            # no configuration for processing
-            if run_result is None and len(commands) == 0:
-                print("{}: No configuration found for processing... {}"
-                      .format(run_name, datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
-                time.sleep(0.1) # wait for a while
-                number_of_waits = number_of_waits + 1
-                if number_of_waits >= MAX_WAITS_COUNT:
+                # no configuration for processing
+                if run_result is None and len(commands) == 0:
+                    print("{}: No configuration found for processing... {}"
+                        .format(run_name, datetime.strftime(datetime.now(), "%b %d %y %H:%M:%S %Z")))
+                    time.sleep(0.1) # wait for a while
+                    number_of_waits = number_of_waits + 1
+                    if number_of_waits >= MAX_WAITS_COUNT:
+                        break
+                    else:
+                        continue
+                elif run_result is None:
                     break
-                else:
-                    continue
-            elif run_result is None:
+
+                config = get_option_by_id(run_result['OptionId'])
+                run_result_id = run_result['ResultId']
+
+                terminal_idx = idx % len(TERMINAL_POOL)
+                terminal  = TERMINAL_POOL[terminal_idx]
+                terminal_path = terminal['exe_path']
+                data_path = terminal['data_path']
+                set_file_name = create_set_file(data_path, config, run_result_id)
+                ini_file = create_ini_file(data_path, run_result_id,
+                                        date_from, date_to, symbol, set_file_name)
+                cmd = COMMAND_TEMPLATE.format(terminal_path, ini_file)
+                commands.append(cmd)
+
+                # for result processing
+                results[data_path] = run_result_id
+
+            if number_of_waits >= MAX_WAITS_COUNT:
+                print("Stop waiting for configurations to process")
                 break
 
-            config = get_option_by_id(run_result['OptionId'])
-            run_result_id = run_result['ResultId']
+            exec_commands(commands, len(TERMINAL_POOL))
 
-            terminal_idx = idx % len(TERMINAL_POOL)
-            terminal  = TERMINAL_POOL[terminal_idx]
-            terminal_path = terminal['exe_path']
-            data_path = terminal['data_path']
-            set_file_name = create_set_file(data_path, config, run_result_id)
-            ini_file = create_ini_file(data_path, run_result_id,
-                                       date_from, date_to, symbol, set_file_name)
-            cmd = COMMAND_TEMPLATE.format(terminal_path, ini_file)
-            commands.append(cmd)
+            reports = prepare_results(results)
 
-            # for result processing
-            results[data_path] = run_result_id
+            for report in reports:
+                update_run_result_with_report(report)
 
-        if number_of_waits >= MAX_WAITS_COUNT:
-            print("Stop waiting for configurations to process")
-            break
+    FINISH_TIME = datetime.now()
+    print("end running terminals {} ...".format(datetime.strftime(FINISH_TIME, "%b %d %y %H:%M:%S %Z")))
 
-        exec_commands(commands, len(TERMINAL_POOL))
+    if predict == True:
+        predictor = TradeResultPredictor(configuration_id)
+        predictor.run()
 
-        reports = prepare_results(results)
+    ELAPSED = FINISH_TIME - START_TIME
+    print("elapsed {}...".format(ELAPSED))
 
-        for report in reports:
-            update_run_result_with_report(report)
+def command_line_runner():
+    parser = get_parser()
+    args = vars(parser.parse_args())
 
+    if args['version']:
+        print(__version__)
+        return
 
-FINISH_TIME = datetime.now()
-print("end running terminals {} ...".format(datetime.strftime(FINISH_TIME, "%b %d %y %H:%M:%S %Z")))
+    if not args['configuration_id']:
+        parser.print_help()
+        return
 
-ELAPSED = FINISH_TIME - START_TIME
-print("elapsed {}...".format(ELAPSED))
+    refresh = False
+    predict = False
 
-input("press Enter to exit ...")
+    if args['refresh']:
+        refresh = bool(args['refresh'])
+
+    if args['predict']:
+        predict = bool(args['predict'])
+
+    configuration_id = int(args['configuration_id'])
+    
+    print('Start running tool for configuration_id = {}, refresh = {}, predict = {}'.format(configuration_id, refresh, predict))
+    run(configuration_id, refresh, predict)
+
+def get_parser():
+    parser = argparse.ArgumentParser(description='collect MT4 reports for configurations and predict future trades based on history')
+
+    parser.add_argument('-cid', '--configuration_id', help='configuration id', type=str)
+
+    parser.add_argument('-r', '--refresh', 
+        help='refresh configuration option results (effectively it means - delete all run results and collect data again)',
+        type=bool)
+
+    parser.add_argument('-p', '--predict',
+        help='if this option is set to True, then the tool will predict future trades for configuration options and send email notification',
+        type=bool)
+
+    parser.add_argument('-v', '--version', help='displays the current version of analytics module',
+                        action='store_true')
+
+    return parser
+
+if __name__ == '__main__':
+    command_line_runner()

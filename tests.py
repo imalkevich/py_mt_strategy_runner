@@ -5,17 +5,20 @@
 import inspect
 import os
 import pandas
+import numpy as np
 import unittest
 import unittest.mock as mock
 
 from datetime import datetime
+from decimal import Decimal
+from numpy.testing import assert_array_equal
 from pandas.util.testing import assert_frame_equal
 
 from db.run_result import add_run_result_trade, remove_run_result_trades_by_configuration_id, reset_run_results_by_configuration_id
 from db.run_result import get_completed_run_results_by_configuration_id
 from db.run_result import get_run_result_trades_by_result_id
 
-from machine_learning.analytics import TradeResultPredictor
+from machine_learning.analytics import TradeResultPredictor, MultilayerPerceptron
 
 from util.result_extractor import prepare_results
 
@@ -163,10 +166,91 @@ class TradeResultPredictorTestCase(unittest.TestCase):
 
     def test_run(self):
         # arrange
-        predictor = TradeResultPredictor(3)
+        predictor = TradeResultPredictor(4, verbose=2)
 
         # act
         predictor.run()
+
+    @mock.patch('machine_learning.analytics.smtplib')
+    def test_send_notification(self, mock_smtplib):
+        # arrange
+        predictor = TradeResultPredictor('some_configuration_id')
+
+        mock_server = mock.MagicMock()
+        dummySMTP = mock.MagicMock(return_value=mock_server)
+
+        mock_smtplib.SMTP = dummySMTP
+
+        # act
+        predictor._send_notification('Test email', 'Test email body', 'smtp_user', 'smtp_password', ['ihar.malkevich@thomsonreuters.com'])
+
+        # assert
+        mock_smtplib.SMTP.assert_called_with('smtp.gmail.com', 587)
+        mock_server.ehlo.assert_called_once()
+        mock_server.starttls.assert_called_once()
+        mock_server.login.assert_called_with('smtp_user', 'smtp_password')
+        mock_server.send_message.assert_called_once()
+        mock_server.quit.assert_called_once()
+
+class MultilayerPerceptronTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_create_dataset(self):
+        # arrange
+        perceptron = MultilayerPerceptron(None)
+
+        source = np.array([
+            [Decimal('1.00')], [Decimal('2.00')], [Decimal('3.00')], [Decimal('4.00')], [Decimal('5.00')],
+            [Decimal('6.00')], [Decimal('7.00')], [Decimal('8.00')]
+        ])
+
+        # act
+        (dataX, dataY) = perceptron._create_dataset(source, look_back=3)
+
+        # assert
+        expectedX = np.array([
+            [Decimal('1.00'), Decimal('2.00'), Decimal('3.00')],
+            [Decimal('2.00'), Decimal('3.00'), Decimal('4.00')],
+            [Decimal('3.00'), Decimal('4.00'), Decimal('5.00')],
+            [Decimal('4.00'), Decimal('5.00'), Decimal('6.00')]
+        ])
+        expectedY = np.array([
+            Decimal('4.00'),
+            Decimal('5.00'),
+            Decimal('6.00'),
+            Decimal('7.00')
+        ])
+        assert_array_equal(dataX, expectedX)
+        assert_array_equal(dataY, expectedY)
+
+    def test_predict(self):
+        # arrange
+        def side_effect(*args):
+            if np.array_equal(args[0], np.array([[Decimal('1.00'), Decimal('2.00'), Decimal('3.00'), Decimal('4.00'), Decimal('5.00')]])):
+                return np.array([[Decimal('6.00')]])
+            elif np.array_equal(args[0], np.array([[Decimal('2.00'), Decimal('3.00'), Decimal('4.00'), Decimal('5.00'), Decimal('6.00')]])):
+                return np.array([[Decimal('7.00')]])
+            elif np.array_equal(args[0], np.array([[Decimal('3.00'), Decimal('4.00'), Decimal('5.00'), Decimal('6.00'), Decimal('7.00')]])):
+                return np.array([[Decimal('8.00')]])
+            return 0
+
+        dataset = np.array([
+            [Decimal('1.00')], [Decimal('2.00')], [Decimal('3.00')], [Decimal('4.00')], [Decimal('5.00')]
+        ])
+        perceptron = MultilayerPerceptron(dataset, look_back=5)
+        perceptron.model = mock.MagicMock()
+        perceptron.model.predict = mock.MagicMock(side_effect=side_effect)
+
+        # act
+        predicted = perceptron.predict(look_forth=3)
+
+        # assert
+        self.assertEqual(predicted, [Decimal('6.00'), Decimal('7.00'), Decimal('8.00')])
+
 
 if __name__ == '__main__':
     unittest.main()
