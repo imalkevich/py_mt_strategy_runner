@@ -58,22 +58,26 @@ Idea
     pool = {exe file folder}|{data path folder}
 
 5) Run main script to collect MT4 results and store them into database:
-    for example "python -m main --cid 4 -r -p"
+    for example "python -m main -cid 4 -r True -m 5"
     
-    usage: main.py [-h] [-cid CONFIGURATION_ID] [-r REFRESH] [-p PREDICT] [-v]
+    usage: main.py [-h] [-cid CONFIGURATION_ID] [-r REFRESH] [-m MONITOR] [-v]
 
+    Collect MT4 reports for configurations, monitor new trades, and predict future
+    trades based on history
+
+    optional arguments:
     -h, --help            show this help message and exit
     -cid CONFIGURATION_ID, --configuration_id CONFIGURATION_ID
                             configuration id
     -r REFRESH, --refresh REFRESH
                             refresh configuration option results (effectively it
                             means - delete all run results and collect data again)
-    -p PREDICT, --predict PREDICT
-                            if this option is specified, then the tool will
-                            predict future trades for configuration options and
-                            send email notification
+    -m MONITOR, --monitor MONITOR
+                            monitor the configurations interval in minutes - once
+                            this parameter is provided, the tool with be running
+                            until stopped running configurations and reporting the
+                            results
     -v, --version         displays the current version of analytics module
-
 
 6) Run the following command to perform analysis and predictions for a configuration:
     python -m machine_learning.analytics

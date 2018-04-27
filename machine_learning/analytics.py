@@ -50,7 +50,7 @@ class TradeResultPredictor(object):
             # drop unneeded columns
             dataset = trades.drop(trades.columns.difference(['Profit']), 1).values[:,:]
 
-            perceptron = MultilayerPerceptron(dataset, verbose=self.verbose)
+            perceptron = MultilayerPerceptron(run_results['ResultId'], dataset, verbose=self.verbose)
             stats = perceptron.train()
             predicted_trades = perceptron.predict(look_forth = 3)
 

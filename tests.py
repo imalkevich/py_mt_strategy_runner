@@ -169,7 +169,7 @@ class TradeResultPredictorTestCase(unittest.TestCase):
         predictor = TradeResultPredictor(4, verbose=2)
 
         # act
-        predictor.run()
+        #predictor.run()
 
     @mock.patch('machine_learning.analytics.smtplib')
     def test_send_notification(self, mock_smtplib):
@@ -201,7 +201,7 @@ class MultilayerPerceptronTestCase(unittest.TestCase):
 
     def test_create_dataset(self):
         # arrange
-        perceptron = MultilayerPerceptron(None)
+        perceptron = MultilayerPerceptron('result_id', None)
 
         source = np.array([
             [Decimal('1.00')], [Decimal('2.00')], [Decimal('3.00')], [Decimal('4.00')], [Decimal('5.00')],
@@ -241,7 +241,7 @@ class MultilayerPerceptronTestCase(unittest.TestCase):
         dataset = np.array([
             [Decimal('1.00')], [Decimal('2.00')], [Decimal('3.00')], [Decimal('4.00')], [Decimal('5.00')]
         ])
-        perceptron = MultilayerPerceptron(dataset, look_back=5)
+        perceptron = MultilayerPerceptron('result_id', dataset, look_back=5)
         perceptron.model = mock.MagicMock()
         perceptron.model.predict = mock.MagicMock(side_effect=side_effect)
 
@@ -250,6 +250,50 @@ class MultilayerPerceptronTestCase(unittest.TestCase):
 
         # assert
         self.assertEqual(predicted, [Decimal('6.00'), Decimal('7.00'), Decimal('8.00')])
+
+    @mock.patch('machine_learning.multilayer_perceptron.open')
+    @mock.patch('machine_learning.multilayer_perceptron.path')
+    @mock.patch('machine_learning.multilayer_perceptron.models')
+    def test_get_trained_model_should_train_new_model_no_model_files(self, mock_models, mock_path, mock_open):
+        # arrange
+        mock_instance = mock.MagicMock()
+        mock_models.Sequential = mock.MagicMock(return_value=mock_instance)
+        mock_path.isfile.return_value = False
+        mock_open.return_value = mock.MagicMock()
+
+        perceptron = MultilayerPerceptron('result_id', None)
+        sample = np.array([[1], [2]])
+
+        # act
+        model = perceptron._get_trained_model(sample, sample, sample, sample)
+
+        # assert
+        self.assertIsNotNone(model)
+        mock_instance.compile.assert_called_once()
+        mock_instance.fit.assert_called_once()
+        mock_instance.to_json.assert_called_once()
+        mock_instance.save_weights.assert_called_once()
+        mock_open.assert_called_once()
+
+    @mock.patch('machine_learning.multilayer_perceptron.open')
+    @mock.patch('machine_learning.multilayer_perceptron.path')
+    @mock.patch('machine_learning.multilayer_perceptron.models')
+    def test_get_trained_model_should_load_existing_model_files_exist(self, mock_models, mock_path, mock_open):
+        # arrange
+        mock_instance = mock.MagicMock()
+        mock_models.model_from_json = mock.MagicMock(return_value=mock_instance)
+        mock_path.isfile.return_value = True
+        mock_open.return_value = mock.MagicMock()
+
+        perceptron = MultilayerPerceptron('result_id', None)
+
+        # act
+        model = perceptron._get_trained_model(None, None, None, None)
+
+        # assert
+        self.assertIsNotNone(model)
+        mock_models.model_from_json.assert_called_once()
+        mock_instance.load_weights.assert_called_once()
 
 
 if __name__ == '__main__':
