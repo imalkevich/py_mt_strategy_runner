@@ -214,3 +214,42 @@ def reset_run_results_by_configuration_id(configuration_id):
     cursor.close()
     del cursor
     cnxn.commit()
+
+def get_run_result_trades_summary_by_configuration_id(configuration_id):
+    tsql = """
+    select
+        rr.RunId,
+        rrt.ResultId, 
+        COUNT(rrt.ResultId) as NumTrades,
+        Max(rrt.CloseTime) as MaxCloseTime
+    from 
+        dbo.wsrt_run_result_trade rrt
+    inner join dbo.wsrt_run_result rr on rrt.ResultId = rr.ResultId
+    where rr.RunId in (select r.RunId from dbo.wsrt_run r where r.ConfigurationId = ?)
+    group by rr.RunId, rrt.ResultId
+    order by rrt.ResultId
+    """
+    cnxn = _get_connection()
+    cursor = cnxn.cursor()
+    cursor.execute(tsql, configuration_id)
+
+    rows = [dict(zip([column[0] for column in cursor.description], row)) for row in cursor.fetchall()]
+    df = pandas.DataFrame(rows)
+
+    cursor.close()
+    del cursor
+
+    return df
+
+def delete_trades_by_rusult_id_and_close_time(result_id, cutoff_close_time):
+    tsql = '''
+        delete from dbo.wsrt_run_result_trade where ResultId = ? and CloseTime > ?
+    '''
+    cnxn = _get_connection()
+    cursor = cnxn.cursor()
+
+    cursor.execute(tsql, result_id, cutoff_close_time)
+
+    cursor.close()
+    del cursor
+    cnxn.commit()

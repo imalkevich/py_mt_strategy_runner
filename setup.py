@@ -64,6 +64,7 @@ setup(
     },
     install_requires=[
         'keras',
+        'h5py',
         'numpy',
         'PTable',
         'pandas',

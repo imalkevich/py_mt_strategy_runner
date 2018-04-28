@@ -72,7 +72,8 @@ class MultilayerPerceptron(object):
             with open(model_file_name, 'r') as json_file:
                 model = models.model_from_json(json_file.read())
             model.load_weights(weights_file_name)
-            
+            model.compile(loss='mean_squared_error', optimizer='adam')
+
         return model
 
     def train(self):

@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from email.message import EmailMessage
 from prettytable import PrettyTable
 from util.config import config
+from util.logging import print_now
 
 from . import __version__
 from .multilayer_perceptron import MultilayerPerceptron
@@ -27,7 +28,7 @@ class TradeResultPredictor(object):
         self.start_time = datetime.now()
 
     def run(self):
-        print('Starting running for configuration = {}'.format(self.configuration_id))
+        print_now('TradeResultPredictor starting running, configuration = {}'.format(self.configuration_id))
 
         run_results = get_completed_run_results_by_configuration_id(self.configuration_id)
         tbl = PrettyTable()
@@ -93,10 +94,9 @@ class TradeResultPredictor(object):
 
             body += 'Thanks'
 
-            print('Sending notifications...')
             self._send_notification(subject, body, smtp_user, smtp_password, recipients)
-        
-        print('Done')
+            
+            print_now('TradeResultPredictor notifications sent, configuration_id = {}'.format(self.configuration_id))
 
     def _send_notification(self, subject, body, smtp_user, smtp_password, recipients, cc=None, bcc=None):
         msg = EmailMessage()
