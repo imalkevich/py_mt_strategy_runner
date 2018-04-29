@@ -12,6 +12,7 @@ from pyquery import PyQuery as pq
 reNumber = r'([-+]?\d+[.]?\d*)'
 reNumberWithPercent = r'([-+]?\d+[.]?\d*) (\([-+]?\d+[.]?\d*%\))'
 reBoolean = r'(true|false)'
+reTradeType = r'(sell|buy)'
 
 TRADE_DATETIME_FORMAT = '%Y.%m.%d %H:%M'
 
@@ -75,13 +76,29 @@ def prepare_results(terminals):
             trades = []
             html = pq(lines)
             rows = html('table:eq(1) tr')
+            new_trade = None
+            type_counter = 0
+            close_counter = 0
             for row in rows:
                 row = pq(row)
+                trade_type = row('td:eq(2)').text().strip()
                 profit_text = row('td:eq(8)').text().strip()
+                if len(trade_type) and re.search(reTradeType, trade_type) != None:
+                    type_counter += 1
+                    open_time = datetime.strptime(row('td:eq(1)').text().strip(), TRADE_DATETIME_FORMAT)
+                    new_trade = { 'OpenTime': open_time, 'Type': trade_type }
                 if len(profit_text) and re.search(reNumber, profit_text) != None:
-                    trade_time = datetime.strptime(row('td:eq(1)').text().strip(), TRADE_DATETIME_FORMAT)
+                    close_counter += 1
+                    if type_counter != close_counter:
+                        raise AssertionError('report_extractor - invalid handling of HTML')
+                    close_time = datetime.strptime(row('td:eq(1)').text().strip(), TRADE_DATETIME_FORMAT)
                     profit = float(profit_text)
-                    trades.append({ 'Time': trade_time, 'Profit': profit })
+                    new_trade['CloseTime'] = close_time
+                    new_trade['Profit'] = profit
+                    trades.append(new_trade)
+                    
+                    # reset new_trade
+                    new_trade = None
 
             data['Trades'] = trades
 

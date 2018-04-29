@@ -53,23 +53,23 @@ class ResultExtractorTestCase(unittest.TestCase):
         self.assertEqual(report['TotalNetProfit'], '1145.19')
         self.assertEqual(len(report['Trades']), 17)
         trades = [
-            { 'Time': datetime(2018, 1, 3, 21, 15, 0), 'Profit': 380.0 },
-            { 'Time': datetime(2018, 1, 11, 23, 30, 0), 'Profit': 124.80 },
-            { 'Time': datetime(2018, 1, 12, 15, 46, 0), 'Profit': 21.10 },
-            { 'Time': datetime(2018, 1, 12, 15, 46, 0), 'Profit': 548.60 },
-            { 'Time': datetime(2018, 1, 16, 1, 30, 0), 'Profit': 53.17 },
-            { 'Time': datetime(2018, 1, 16, 4, 30, 0), 'Profit': 276.52 },
-            { 'Time': datetime(2018, 1, 16, 9, 8, 0), 'Profit': 22.90 },
-            { 'Time': datetime(2018, 1, 18, 7, 0, 0), 'Profit': -813.29 },
-            { 'Time': datetime(2018, 1, 23, 5, 23, 0), 'Profit': 21.30 },
-            { 'Time': datetime(2018, 1, 23, 7, 12, 0), 'Profit': 21.30 },
-            { 'Time': datetime(2018, 1, 25, 9, 31, 0), 'Profit': 21.40 },
-            { 'Time': datetime(2018, 1, 25, 9, 56, 0), 'Profit': 21.40 },
-            { 'Time': datetime(2018, 1, 25, 10, 26, 0), 'Profit': 21.40 },
-            { 'Time': datetime(2018, 1, 25, 19, 22, 0), 'Profit': 21.50 },
-            { 'Time': datetime(2018, 1, 25, 20, 28, 0), 'Profit': 21.50 },
-            { 'Time': datetime(2018, 1, 30, 2, 45, 0), 'Profit': 359.29 },
-            { 'Time': datetime(2018, 1, 30, 11, 38, 0), 'Profit': 22.30 },
+            { 'OpenTime': datetime(2018, 1, 3, 20, 0, 0), 'Type': 'sell', 'CloseTime': datetime(2018, 1, 3, 21, 15, 0), 'Profit': 380.0 },
+            { 'OpenTime': datetime(2018, 1, 11, 21, 30, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 11, 23, 30, 0), 'Profit': 124.80 },
+            { 'OpenTime': datetime(2018, 1, 12, 15, 45, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 12, 15, 46, 0), 'Profit': 21.10 },
+            { 'OpenTime': datetime(2018, 1, 12, 15, 46, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 12, 15, 46, 0), 'Profit': 548.60 },
+            { 'OpenTime': datetime(2018, 1, 15, 22, 15, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 16, 1, 30, 0), 'Profit': 53.17 },
+            { 'OpenTime': datetime(2018, 1, 16, 3, 15, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 16, 4, 30, 0), 'Profit': 276.52 },
+            { 'OpenTime': datetime(2018, 1, 16, 6, 0, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 16, 9, 8, 0), 'Profit': 22.90 },
+            { 'OpenTime': datetime(2018, 1, 17, 23, 0, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 18, 7, 0, 0), 'Profit': -813.29 },
+            { 'OpenTime': datetime(2018, 1, 23, 4, 30, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 23, 5, 23, 0), 'Profit': 21.30 },
+            { 'OpenTime': datetime(2018, 1, 23, 6, 15, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 23, 7, 12, 0), 'Profit': 21.30 },
+            { 'OpenTime': datetime(2018, 1, 25, 9, 15, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 25, 9, 31, 0), 'Profit': 21.40 },
+            { 'OpenTime': datetime(2018, 1, 25, 9, 31, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 25, 9, 56, 0), 'Profit': 21.40 },
+            { 'OpenTime': datetime(2018, 1, 25, 9, 58, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 25, 10, 26, 0), 'Profit': 21.40 },
+            { 'OpenTime': datetime(2018, 1, 25, 19, 0, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 25, 19, 22, 0), 'Profit': 21.50 },
+            { 'OpenTime': datetime(2018, 1, 25, 19, 30, 0), 'Type': 'buy', 'CloseTime': datetime(2018, 1, 25, 20, 28, 0), 'Profit': 21.50 },
+            { 'OpenTime': datetime(2018, 1, 29, 21, 15, 0), 'Type': 'sell', 'CloseTime': datetime(2018, 1, 30, 2, 45, 0), 'Profit': 359.29 },
+            { 'OpenTime': datetime(2018, 1, 30, 11, 15, 0), 'Type': 'sell', 'CloseTime': datetime(2018, 1, 30, 11, 38, 0), 'Profit': 22.30 },
         ]
         self.assertEqual(report['Trades'], trades)
 
@@ -83,13 +83,13 @@ class DatabaseTestCase(unittest.TestCase):
     def test_add_run_result_trade(self):
         # arrange
         mock_cursor = mock.MagicMock()
-        trade = { 'Time': 'someTime', 'Profit': 'someProfit' }
+        trade = { 'OpenTime': 'someOpenTime', 'Type': 'someType', 'CloseTime': 'someCloseTime', 'Profit': 'someProfit' }
         
         # act
         add_run_result_trade(mock_cursor, 'testResultId', trade)
 
         # assert
-        mock_cursor.execute.assert_called_with(mock.ANY, 'testResultId', 'someTime', 'someProfit')
+        mock_cursor.execute.assert_called_with(mock.ANY, 'testResultId', 'someOpenTime', 'someType', 'someCloseTime', 'someProfit')
 
     @mock.patch('db.run_result._get_connection')
     def test_remove_run_result_trades_by_configuration_id(self, mock_get_connection):

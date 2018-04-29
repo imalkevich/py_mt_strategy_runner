@@ -145,16 +145,18 @@ def add_run_result_trade(cursor, result_id, trade):
     INSERT INTO [dbo].[wsrt_run_result_trade]
     (
         [ResultId],
+        [OpenTime],
+        [Type],
         [CloseTime],
         [Profit]
     )
     VALUES
     (
-        ?,?,?
+        ?,?,?,?,?
     )
     """
 
-    cursor.execute(tsql, result_id, trade['Time'], trade['Profit'])
+    cursor.execute(tsql, result_id, trade['OpenTime'], trade['Type'], trade['CloseTime'], trade['Profit'])
 
 def get_run_result_trades_by_result_id(result_id):
     tsql = """
