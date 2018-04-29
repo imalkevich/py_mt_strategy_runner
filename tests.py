@@ -391,12 +391,11 @@ class MainTestClass(unittest.TestCase):
         ])
         mock_run_result.reset_run_results_by_configuration_id.assert_called_with('id')
 
-    """ DO NOT UNCOMMENT - USE FOR DEBUGGING
+    """ DO NOT UNCOMMENT - USE FOR DEBUGGING """
     def test_process(self):
 
         # act
-        process(4, False, 5)
-    """
+        process(5, True, -1)
 
 class Metatrader4TestClass(unittest.TestCase):
     def setUp(self):
