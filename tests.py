@@ -391,11 +391,12 @@ class MainTestClass(unittest.TestCase):
         ])
         mock_run_result.reset_run_results_by_configuration_id.assert_called_with('id')
 
-    """ DO NOT UNCOMMENT - USE FOR DEBUGGING """
+    """ REAL PROCESSING - USE FOR DEBUGGING ONLY 
     def test_process(self):
 
         # act
         process(5, True, -1)
+    """
 
 class Metatrader4TestClass(unittest.TestCase):
     def setUp(self):
@@ -507,6 +508,39 @@ class TradesDiffReporterTestClass(unittest.TestCase):
 
         # assert
         self.assertTrue(report['hasNewTrades'])
+    
+    def test_generate_report_no_after_trades(self):
+        # arrange
+        reporter = TradesDiffReporter('id')
+        before = pd.DataFrame({
+            'ResultId': [1, 2, 3],
+            'before_NumTrades': [10, 15, 20],
+            'before_MaxCloseTime': [datetime(2018, 4, 27, 9, 15, 0), datetime(2018, 4, 27, 9, 20, 0), datetime(2018, 4, 27, 9, 25, 0)]
+        })
+
+        after = pd.DataFrame()
+
+        # act
+        report = reporter._generate_report(before, after)
+
+        # assert
+        self.assertFalse(report['hasNewTrades'])
+
+    def test_generate_report_no_before_trades(self):
+        # arrange
+        reporter = TradesDiffReporter('id')
+        before = pd.DataFrame()
+        after = pd.DataFrame({
+            'ResultId': [1, 2, 3],
+            'before_NumTrades': [10, 15, 20],
+            'before_MaxCloseTime': [datetime(2018, 4, 27, 9, 15, 0), datetime(2018, 4, 27, 9, 20, 0), datetime(2018, 4, 27, 9, 25, 0)]
+        })
+
+        # act
+        report = reporter._generate_report(before, after)
+
+        # assert
+        self.assertTrue(report['hasNewTrades'])
 
 class SmartMetatrader4TestClass(unittest.TestCase):
     def setUp(self):
@@ -543,15 +577,15 @@ class SmartMetatrader4TestClass(unittest.TestCase):
         reports = [{
             'ResultId': 1,
             'Trades': [
-                {'Time': datetime(2018, 4, 25, 9, 0, 0), 'Profit': -11.0},
-                {'Time': datetime(2018, 4, 25, 17, 0, 0), 'Profit': 15.0},
-                {'Time': datetime(2018, 4, 26, 3, 0, 0), 'Profit': 25.0}
+                {'CloseTime': datetime(2018, 4, 25, 9, 0, 0), 'Profit': -11.0},
+                {'CloseTime': datetime(2018, 4, 25, 17, 0, 0), 'Profit': 15.0},
+                {'CloseTime': datetime(2018, 4, 26, 3, 0, 0), 'Profit': 25.0}
             ]}, {
             'ResultId': 2,
             'Trades': [
-                {'Time': datetime(2018, 4, 26, 9, 0, 0), 'Profit': -11.0},
-                {'Time': datetime(2018, 4, 26, 17, 0, 0), 'Profit': 15.0},
-                {'Time': datetime(2018, 4, 26, 22, 0, 0), 'Profit': 25.0}
+                {'CloseTime': datetime(2018, 4, 26, 9, 0, 0), 'Profit': -11.0},
+                {'CloseTime': datetime(2018, 4, 26, 17, 0, 0), 'Profit': 15.0},
+                {'CloseTime': datetime(2018, 4, 26, 22, 0, 0), 'Profit': 25.0}
             ]
         }]
 
@@ -564,7 +598,7 @@ class SmartMetatrader4TestClass(unittest.TestCase):
         expected_reports = [{
             'ResultId': 1,
             'Trades': [
-                {'Time': datetime(2018, 4, 26, 3, 0, 0), 'Profit': 25.0}
+                {'CloseTime': datetime(2018, 4, 26, 3, 0, 0), 'Profit': 25.0}
             ]}, {
             'ResultId': 2,
             'Trades': []

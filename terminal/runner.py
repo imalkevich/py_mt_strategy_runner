@@ -131,7 +131,7 @@ class SmartMetatrader4(Metatrader4):
         for report in reports:
             date_from = terminal.get_run_result_date_from(date_from, report['ResultId'], self.trades_before_run)
 
-            report['Trades'] = [trade for trade in report['Trades'] if trade['Time'] > date_from]
+            report['Trades'] = [trade for trade in report['Trades'] if trade['CloseTime'] > date_from]
 
         return reports
 

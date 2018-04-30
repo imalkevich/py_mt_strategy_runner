@@ -25,11 +25,16 @@ class TradesDiffReporter(object):
         return new_cols_dict
 
     def _generate_report(self, before, after):
-        result = pd.merge(before, after, how='inner', on='ResultId')
-        result['TradeDiff'] = result.apply(lambda row: row['after_NumTrades'] - row['before_NumTrades'], axis=1)
-        result['HasNewTrades'] = result.apply(lambda row: row['TradeDiff'] > 0 or row['before_MaxCloseTime'] != row['after_MaxCloseTime'], axis=1)
+        hasNewTrades = False
 
-        hasNewTrades = result[result['HasNewTrades'] == True].shape[0] > 0
+        if before.shape[0] > 0 and after.shape[0] > 0:
+            result = pd.merge(before, after, how='inner', on='ResultId')
+            result['TradeDiff'] = result.apply(lambda row: row['after_NumTrades'] - row['before_NumTrades'], axis=1)
+            result['HasNewTrades'] = result.apply(lambda row: row['TradeDiff'] > 0 or row['before_MaxCloseTime'] != row['after_MaxCloseTime'], axis=1)
+
+            hasNewTrades = result[result['HasNewTrades'] == True].shape[0] > 0
+        elif before.shape[0] == 0 and after.shape[0] > 0:
+            hasNewTrades = True
 
         report = {
             'hasNewTrades': hasNewTrades
