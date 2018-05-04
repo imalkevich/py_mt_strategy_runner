@@ -124,7 +124,7 @@ class SmartMetatrader4(Metatrader4):
 
     def _adjust_reports(self, date_from, reports):
         for report in reports:
-            date_from = terminal.get_run_result_date_from(date_from, report['ResultId'], self.trades_before_run, shift_days=0)
+            date_from = terminal.get_run_result_date_from(date_from, report['ResultId'], self.trades_before_run)
 
             report['Trades'] = [trade for trade in report['Trades'] if trade['CloseTime'] > date_from]
 
@@ -136,6 +136,7 @@ class SmartMetatrader4(Metatrader4):
         return date_from
 
     def run(self, trades_before_run):
+        self.trades_before_run = trades_before_run
         reporter = reporting.TradesDiffReporter(self.configuration_id, trades_before_run)
 
         (start_run_time, end_run_time) = super(SmartMetatrader4, self).run()
