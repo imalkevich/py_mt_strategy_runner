@@ -9,9 +9,9 @@ import pandas as pd
 from db import run_result
 
 class TradesDiffReporter(object):
-    def __init__(self, configuration_id):
+    def __init__(self, configuration_id, trades_before_run):
         self.configuration_id = configuration_id
-        self.trades_before_run = None
+        self.trades_before_run = trades_before_run
         self.trades_after_run = None
 
     def _get_new_column_names(self, prefix, columns):
@@ -41,13 +41,12 @@ class TradesDiffReporter(object):
         }
 
         return report
+        
 
-    def collect_data(self):
-        self.trades_before_run = run_result.get_run_result_trades_summary_by_configuration_id(self.configuration_id)
+    def prepare_report(self):
         columns = self._get_new_column_names('before', self.trades_before_run.columns)
         self.trades_before_run.rename(columns=columns, inplace=True)
 
-    def prepare_report(self):
         self.trades_after_run = run_result.get_run_result_trades_summary_by_configuration_id(self.configuration_id)
         columns = self._get_new_column_names('after', self.trades_after_run.columns)
         self.trades_after_run.rename(columns=columns, inplace=True)

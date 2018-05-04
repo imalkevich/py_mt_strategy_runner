@@ -58,7 +58,7 @@ Idea
     pool = {exe file folder}|{data path folder}
 
 5) Run main script to collect MT4 results and store them into database:
-    for example "python -m main -cid 4 -r True -m 5"
+    for example "python -m main -cid 4 -r 1 -m 5"
     
     usage: main.py [-h] [-cid CONFIGURATION_ID] [-r REFRESH] [-m MONITOR] [-v]
 

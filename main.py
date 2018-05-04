@@ -48,6 +48,8 @@ def smart_refresh_trades(configuration_id):
     # reset previously collected results, re-think once an issue
     run_result.reset_run_results_by_configuration_id(configuration_id)
 
+    return trades_before_run
+
 def process(configuration_id, refresh, monitor_interval):
     if refresh == True:
         reset_runner(configuration_id)
@@ -59,8 +61,8 @@ def process(configuration_id, refresh, monitor_interval):
     predictor = TradeResultPredictor(configuration_id)
 
     def do():
-        smart_refresh_trades(configuration_id)
-        (_, _, report) = mt4.run()
+        trades_before_run = smart_refresh_trades(configuration_id)
+        (_, _, report) = mt4.run(trades_before_run)
 
         if report['hasNewTrades'] == True:
             print_now('Running TradeResultPredictor, configuration_id = {}'.format(configuration_id))
@@ -91,7 +93,7 @@ def command_line_runner():
     monitor = -1
 
     if args['refresh']:
-        refresh = bool(args['refresh'])
+        refresh = bool(int(args['refresh']))
 
     if args['monitor']:
         monitor = float(args['monitor'])

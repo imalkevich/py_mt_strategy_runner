@@ -379,9 +379,10 @@ class MainTestClass(unittest.TestCase):
         mock_terminal.get_run_result_date_from = mock.MagicMock(side_effect=side_effect)
 
         # act
-        smart_refresh_trades('id')
+        trades_before_run = smart_refresh_trades('id')
 
         # assert
+        pd.testing.assert_frame_equal(trades, trades_before_run)
         mock_run.get_by_configuration_id.assert_called_with('id')
         mock_run_result.get_run_result_trades_summary_by_configuration_id.assert_called_with('id')
         self.assertEqual(2, mock_terminal.get_run_result_date_from.call_count)
@@ -395,9 +396,9 @@ class MainTestClass(unittest.TestCase):
     def test_process(self):
 
         # act
-        process(5, True, -1)
+        process(4, False, -1)
     """
-
+    
 class Metatrader4TestClass(unittest.TestCase):
     def setUp(self):
         pass
@@ -440,7 +441,7 @@ class TradesDiffReporterTestClass(unittest.TestCase):
         cols = ['ResultId', 'NumTrades', 'MaxCloseTime']
 
         # act
-        new_cols = TradesDiffReporter('id')._get_new_column_names('before', cols)
+        new_cols = TradesDiffReporter('id', None)._get_new_column_names('before', cols)
 
         # assert
         expected_cols = { 'ResultId': 'ResultId', 'NumTrades': 'before_NumTrades', 'MaxCloseTime': 'before_MaxCloseTime' }
@@ -448,12 +449,13 @@ class TradesDiffReporterTestClass(unittest.TestCase):
 
     def test_generate_report_no_diff(self):
         # arrange
-        reporter = TradesDiffReporter('id')
         before = pd.DataFrame({
             'ResultId': [1, 2, 3],
             'before_NumTrades': [10, 15, 20],
             'before_MaxCloseTime': [datetime(2018, 4, 27, 9, 15, 0), datetime(2018, 4, 27, 9, 20, 0), datetime(2018, 4, 27, 9, 25, 0)]
         })
+
+        reporter = TradesDiffReporter('id', before)
 
         after = pd.DataFrame({
             'ResultId': [1, 2, 3],
@@ -469,12 +471,13 @@ class TradesDiffReporterTestClass(unittest.TestCase):
 
     def test_generate_report_diff_number_trades(self):
         # arrange
-        reporter = TradesDiffReporter('id')
         before = pd.DataFrame({
             'ResultId': [1, 2, 3],
             'before_NumTrades': [10, 15, 20],
             'before_MaxCloseTime': [datetime(2018, 4, 27, 9, 15, 0), datetime(2018, 4, 27, 9, 20, 0), datetime(2018, 4, 27, 9, 25, 0)]
         })
+
+        reporter = TradesDiffReporter('id', before)
 
         after = pd.DataFrame({
             'ResultId': [1, 2, 3],
@@ -490,12 +493,13 @@ class TradesDiffReporterTestClass(unittest.TestCase):
 
     def test_generate_report_diff_by_dates(self):
         # arrange
-        reporter = TradesDiffReporter('id')
         before = pd.DataFrame({
             'ResultId': [1, 2, 3],
             'before_NumTrades': [10, 15, 20],
             'before_MaxCloseTime': [datetime(2018, 4, 27, 9, 15, 0), datetime(2018, 4, 27, 9, 20, 0), datetime(2018, 4, 27, 9, 25, 0)]
         })
+
+        reporter = TradesDiffReporter('id', before)
 
         after = pd.DataFrame({
             'ResultId': [1, 2, 3],
@@ -511,12 +515,13 @@ class TradesDiffReporterTestClass(unittest.TestCase):
     
     def test_generate_report_no_after_trades(self):
         # arrange
-        reporter = TradesDiffReporter('id')
         before = pd.DataFrame({
             'ResultId': [1, 2, 3],
             'before_NumTrades': [10, 15, 20],
             'before_MaxCloseTime': [datetime(2018, 4, 27, 9, 15, 0), datetime(2018, 4, 27, 9, 20, 0), datetime(2018, 4, 27, 9, 25, 0)]
         })
+
+        reporter = TradesDiffReporter('id', before)
 
         after = pd.DataFrame()
 
@@ -528,8 +533,10 @@ class TradesDiffReporterTestClass(unittest.TestCase):
 
     def test_generate_report_no_before_trades(self):
         # arrange
-        reporter = TradesDiffReporter('id')
-        before = pd.DataFrame()
+        before  = pd.DataFrame()
+
+        reporter = TradesDiffReporter('id', before)
+        
         after = pd.DataFrame({
             'ResultId': [1, 2, 3],
             'before_NumTrades': [10, 15, 20],
@@ -565,7 +572,7 @@ class SmartMetatrader4TestClass(unittest.TestCase):
     @mock.patch('terminal.runner.terminal')
     def test_adjust_reports(self, mock_terminal):
         # arrange
-        def side_effect(*args):
+        def side_effect(*args, **kwargs):
             if args[1] == 1:
                 return datetime(2018, 4, 26, 0, 0, 0)
             elif args[1] == 2:
@@ -644,6 +651,19 @@ class TerminalUtilTestClass(unittest.TestCase):
 
         # assert
         self.assertEqual(datetime(2018, 4, 26, 0, 0, 0), date_from)
+
+    def test_get_run_result_date_from_zero_shift(self):
+        # arrange
+        df_run_trades = pd.DataFrame({
+            'ResultId': [1],
+            'MaxCloseTime': [datetime(2018, 5, 1, 9, 15, 0)]
+        })
+
+        # act
+        date_from = terminal.get_run_result_date_from('2018.04.01', 1, df_run_trades, shift_days=0)
+
+        # assert
+        self.assertEqual(datetime(2018, 5, 1, 9, 15, 0), date_from)
 
     @mock.patch('util.terminal.terminal')
     def test_get_run_result_date_from_formatted(self, mock_terminal):

@@ -47,9 +47,6 @@ class Metatrader4(object):
         if self.verbose:
             print_now("Start running terminals, configuration_id = {}".format(self.configuration_id))
 
-        reporter = reporting.TradesDiffReporter(self.configuration_id)
-        reporter.collect_data()
-
         runs = get_by_configuration_id(self.configuration_id)
 
         for run in runs:
@@ -118,9 +115,7 @@ class Metatrader4(object):
             elapsed = end_run_time - start_run_time
             print_now("Running terminals took {}, configuration_id = {}".format(elapsed, self.configuration_id))
 
-        report = reporter.prepare_report()
-
-        return (start_run_time, end_run_time, report)
+        return (start_run_time, end_run_time)
 
 class SmartMetatrader4(Metatrader4):
     def __init__(self, configuration_id, terminal_pool, verbose = False):
@@ -129,7 +124,7 @@ class SmartMetatrader4(Metatrader4):
 
     def _adjust_reports(self, date_from, reports):
         for report in reports:
-            date_from = terminal.get_run_result_date_from(date_from, report['ResultId'], self.trades_before_run)
+            date_from = terminal.get_run_result_date_from(date_from, report['ResultId'], self.trades_before_run, shift_days=0)
 
             report['Trades'] = [trade for trade in report['Trades'] if trade['CloseTime'] > date_from]
 
@@ -140,9 +135,11 @@ class SmartMetatrader4(Metatrader4):
 
         return date_from
 
-    def run(self):
-        self.trades_before_run = run_result.get_run_result_trades_summary_by_configuration_id(self.configuration_id)
+    def run(self, trades_before_run):
+        reporter = reporting.TradesDiffReporter(self.configuration_id, trades_before_run)
 
-        report = super(SmartMetatrader4, self).run()
+        (start_run_time, end_run_time) = super(SmartMetatrader4, self).run()
 
-        return report
+        report = reporter.prepare_report()
+
+        return (start_run_time, end_run_time, report)
