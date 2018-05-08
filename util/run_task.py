@@ -46,7 +46,6 @@ def exec_commands(cmds, degree_of_parallelism):
                     if mt_worker not in task_running:
                         break
 
-            print(task)
             task_running[mt_worker] = 1
             processes.append(Popen(task))
 
