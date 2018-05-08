@@ -110,7 +110,7 @@ def get_parser():
 
     parser.add_argument('-r', '--refresh', 
         help='refresh configuration option results (effectively it means - delete all run results and collect data again)',
-        type=bool)
+        type=int)
 
     parser.add_argument('-m', '--monitor', 
         help='monitor the configurations interval in minutes - once this parameter is provided, the tool with be running until stopped running configurations and reporting the results', 
