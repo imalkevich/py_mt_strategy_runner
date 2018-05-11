@@ -6,12 +6,12 @@ from datetime import datetime
 from decimal import Decimal
 from .connection import get_connection
 
-_cnxn = get_connection()
-
 def _get_connection():
+    _cnxn = get_connection()
     return _cnxn
 
 def insert(result):
+    _cnxn = _get_connection()
     cursor = _cnxn.cursor()
 
     with cursor.execute("""
@@ -47,17 +47,21 @@ def insert(result):
         pass
 
     _cnxn.commit()
+    _cnxn.close()
 
 def mark_as_processing(id):
+    _cnxn = _get_connection()
     cursor = _cnxn.cursor()
     tsql = "UPDATE [dbo].[wsrt_run_result] SET [RunStartDateTimeUtc] = ? WHERE [ResultId] = ?"
     with cursor.execute(tsql, datetime.utcnow(), id):
         pass
 
     _cnxn.commit()
+    _cnxn.close()
 
 def get_for_processing_by_run_id(run_id):
     run_result = None
+    _cnxn = _get_connection()
     cursor = _cnxn.cursor()
     tsql = """
     SELECT TOP 1
@@ -83,6 +87,7 @@ def get_for_processing_by_run_id(run_id):
                 with cursor.execute(process_tsql, datetime.utcnow(), run_result['ResultId']):
                     _cnxn.commit()
 
+    _cnxn.close()
     return run_result
 
 def get_completed_run_results_by_configuration_id(configuration_id):
@@ -101,11 +106,12 @@ def get_completed_run_results_by_configuration_id(configuration_id):
 
     cursor.close()
     del cursor
-
+    cnxn.close()
     return rows
 
 def update_run_result_with_report(report):
     """ """
+    _cnxn = _get_connection()
     cursor = _cnxn.cursor()
     tsql = """
     UPDATE [dbo].[wsrt_run_result] SET
@@ -139,6 +145,7 @@ def update_run_result_with_report(report):
     cursor.close()
     del cursor
     _cnxn.commit()
+    _cnxn.close()
 
 def add_run_result_trade(cursor, result_id, trade):
     tsql = """
@@ -178,7 +185,7 @@ def get_run_result_trades_by_result_id(result_id):
 
     cursor.close()
     del cursor
-
+    cnxn.close()
     return df
 
 def remove_run_result_trades_by_configuration_id(configuration_id):
@@ -197,6 +204,7 @@ def remove_run_result_trades_by_configuration_id(configuration_id):
     cursor.close()
     del cursor
     cnxn.commit()
+    cnxn.close()
 
 def reset_run_results_by_configuration_id(configuration_id):
     tsql = """
@@ -216,6 +224,7 @@ def reset_run_results_by_configuration_id(configuration_id):
     cursor.close()
     del cursor
     cnxn.commit()
+    cnxn.close()
 
 def get_run_result_trades_summary_by_configuration_id(configuration_id):
     tsql = """
@@ -240,7 +249,7 @@ def get_run_result_trades_summary_by_configuration_id(configuration_id):
 
     cursor.close()
     del cursor
-
+    cnxn.close()
     return df
 
 def delete_trades_by_rusult_id_and_close_time(result_id, cutoff_close_time):
@@ -255,3 +264,4 @@ def delete_trades_by_rusult_id_and_close_time(result_id, cutoff_close_time):
     cursor.close()
     del cursor
     cnxn.commit()
+    cnxn.close()
